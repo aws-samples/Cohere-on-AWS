@@ -1,11 +1,14 @@
-## My Project
+## Cohere on AWS examples
 
-TODO: Fill this README out!
+Welcome to the repository hosting example use of Cohere models on AWS! You will find a few folders within this repository that give various examples.
 
-Be sure to:
+### bedrock-prompting-notebooks
+Within this folder, find examples on prompting for Command R and Command R+ models with the Bedrock API
 
-* Change the title in this README
-* Edit your repository description on GitHub
+
+### cohere-cookbooks
+Cohere has consolidated and created a "cookbook" providing examples of using their models. Cohere's Cookbooks can be found here https://docs.cohere.com/page/cookbooks! This folder represents these cookbooks leveraging Bedrock APIs (Converse and Invoke_Model) to help customers become familiar with Bedrock APIs.
+
 
 ## Security
 
