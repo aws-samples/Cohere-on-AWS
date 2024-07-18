@@ -9,6 +9,8 @@ Within this folder, find examples on prompting for Command R and Command R+ mode
 ### cohere-cookbooks
 Cohere has consolidated and created a "cookbook" providing examples of using their models. Cohere's Cookbooks can be found here https://docs.cohere.com/page/cookbooks! This folder represents these cookbooks leveraging Bedrock APIs (Converse and Invoke_Model) to help customers become familiar with Bedrock APIs.
 
+### rag-recipes
+This folder contains example notebooks leveraging RAG approach with mutliple models from Cohere including Rerank and embeddings models.
 
 ## Security
 
