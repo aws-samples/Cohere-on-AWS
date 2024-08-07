@@ -1,5 +1,7 @@
 ## Cohere on AWS examples
 
+![cohereaws](cohere-cookbooks/imgs/cohereaws.png)
+
 Welcome to the repository hosting example use of Cohere models on AWS! You will find a few folders within this repository that give various examples.
 
 ### bedrock-prompting-notebooks
