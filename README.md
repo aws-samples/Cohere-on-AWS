@@ -14,6 +14,8 @@ Open a PR if you would like to contribute! :twisted_rightwards_arrows:
 - [Cohere Rerank Multilingual](rag-recipes/multilingual_reranker_rag_faiss.ipynb) on AWS notebook: This notebook demonstrates how to implement a multilingual Retrieval-Augmented Generation (RAG) system using Cohere's Rerank3 model and FAISS on AWS. We show the integration of Cohere's multilingual capabilities with AWS services to create an efficient and accurate information retrieval system across multiple languages. The notebook includes data preparation, model deployment, and the implementation of the RAG pipeline using Rerank3 for improved search relevance. 
 
 - Next release scheduled for 8/22
+---
+## Notebooks 
 
 ### bedrock-prompting-notebooks
 Within this folder, find examples on prompting for Command R and Command R+ models with the Bedrock API
