@@ -1,0 +1,75 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: 'Amazon OpenSearch Serverless template to create an IAM user, encryption policy, data access policy and collection'
+Resources:
+  IAMUSer:
+    Type: 'AWS::IAM::User'
+    Properties:
+      UserName:  aossadmin
+  DataAccessPolicy:
+    Type: 'AWS::OpenSearchServerless::AccessPolicy'
+    Properties:
+      Name: opensearchcohere-access-policy
+      Type: data
+      Description: Access policy for opensearchcohere collection
+      Policy: !Sub >-
+        [{"Description":"Access for cfn user","Rules":[{"ResourceType":"index","Resource":["index/*/*"],"Permission":["aoss:*"]},
+        {"ResourceType":"collection","Resource":["collection/opensearchcohere"],"Permission":["aoss:*"]}],
+        "Principal":["arn:aws:iam::${AWS::AccountId}:user/aossadmin"]}]
+  NetworkPolicy:
+    Type: 'AWS::OpenSearchServerless::SecurityPolicy'
+    Properties:
+      Name: opensearchcohere-network-policy
+      Type: network
+      Description: Network policy for opensearchcohere collection
+      Policy: >-
+        [{"Rules":[{"ResourceType":"collection","Resource":["collection/opensearchcohere"]}, {"ResourceType":"dashboard","Resource":["collection/opensearchcohere"]}],"AllowFromPublic":true}]
+  EncryptionPolicy:
+    Type: 'AWS::OpenSearchServerless::SecurityPolicy'
+    Properties:
+      Name: opensearchcohere-security-policy
+      Type: encryption
+      Description: Encryption policy for opensearchcohere collection
+      Policy: >-
+        {"Rules":[{"ResourceType":"collection","Resource":["collection/opensearchcohere"]}],"AWSOwnedKey":true}
+  Collection:
+    Type: 'AWS::OpenSearchServerless::Collection'
+    Properties:
+      Name: opensearchcohere
+      Type: VECTORSEARCH
+      Description: Collection that is used to show connectivity to Cohere models
+    DependsOn: EncryptionPolicy
+
+  OpenSearchSageMakerRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: opensearch-sagemaker-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - opensearchservice.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Policies:
+        - PolicyName: SageMakerAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'sagemaker:InvokeEndpointAsync'
+                  - 'sagemaker:InvokeEndpoint'
+                Resource: '*'
+Outputs:
+  IAMUser:
+    Value: !Ref IAMUSer
+  DashboardURL:
+    Value: !GetAtt Collection.DashboardEndpoint
+  CollectionARN:
+    Value: !GetAtt Collection.Arn
+  CollectionEndpoint:
+    Value: !GetAtt Collection.CollectionEndpoint
+  OpenSearchSageMakerRoleARN:
+    Value: !GetAtt OpenSearchSageMakerRole.Arn

@@ -1,0 +1,34 @@
+{
+  "user_profile": {
+    "properties": {
+      "user_id": { "type": "keyword" },
+      "username": { "type": "keyword" },
+      "full_name": { "type": "text" },
+      "email": { "type": "keyword" },
+      "date_of_birth": { "type": "date" },
+      "gender": { "type": "keyword" },
+      "location": {
+        "type": "geo_point"
+      },
+      "join_date": { "type": "date" },
+      "bio": { "type": "text" },
+      "health_interests": {
+        "type": "keyword",
+        "fields": {
+          "text": { "type": "text" }
+        }
+      },
+      "fitness_level": { "type": "keyword" },
+      "medical_conditions": {
+        "type": "keyword",
+        "fields": {
+          "text": { "type": "text" }
+        }
+      },
+      "followers_count": { "type": "integer" },
+      "following_count": { "type": "integer" },
+      "posts_count": { "type": "integer" },
+      "last_active": { "type": "date" }
+    }
+  }
+}

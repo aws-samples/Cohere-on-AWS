@@ -1,0 +1,45 @@
+{
+  "health_post": {
+    "properties": {
+      "post_id": { "type": "keyword" },
+      "user_id": { "type": "keyword" },
+      "username": { "type": "keyword" },
+      "post_type": { "type": "keyword" },
+      "title": { "type": "text" },
+      "content": { "type": "text" },
+      "created_at": { "type": "date" },
+      "updated_at": { "type": "date" },
+      "tags": {
+        "type": "keyword",
+        "fields": {
+          "text": { "type": "text" }
+        }
+      },
+      "category": { "type": "keyword" },
+      "likes_count": { "type": "integer" },
+      "comments_count": { "type": "integer" },
+      "shares_count": { "type": "integer" },
+      "media_urls": { "type": "keyword" },
+      "location": {
+        "type": "geo_point"
+      },
+      "mentioned_users": { "type": "keyword" },
+      "health_metrics": {
+        "properties": {
+          "steps": { "type": "integer" },
+          "calories": { "type": "float" },
+          "heart_rate": { "type": "integer" },
+          "blood_pressure": {
+            "properties": {
+              "systolic": { "type": "integer" },
+              "diastolic": { "type": "integer" }
+            }
+          },
+          "sleep_duration": { "type": "float" }
+        }
+      },
+      "sentiment_score": { "type": "float" },
+      "is_verified": { "type": "boolean" }
+    }
+  }
+}
