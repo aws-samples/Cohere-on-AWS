@@ -24,29 +24,29 @@ Open a PR if you would like to contribute! :twisted_rightwards_arrows:
 ### Cohere cookbooks and training
 Cohere has consolidated and created a "cookbook" providing examples of using their models. Cohere's Cookbooks can be found here https://docs.cohere.com/page/cookbooks! This folder represents these cookbooks leveraging Bedrock APIs (Converse and Invoke_Model) to help customers become familiar with Bedrock APIs.
 
-Learn more on Cohere's LLM university [https://cohere.com/llmu/#cohere-on-aws]
+[Learn more on Cohere's LLM university](https://cohere.com/llmu/#cohere-on-aws)
 
 ### AWS and Cohere blogs
 
-[Run scalable, enterprise-grade generative AI workloads with Cohere Command R & R+, now available in Amazon Bedrock](https://aws.amazon.com/blogs/aws/run-scalable-enterprise-grade-generative-ai-workloads-with-cohere-r-r-now-available-in-amazon-bedrock/)
+- [Run scalable, enterprise-grade generative AI workloads with Cohere Command R & R+, now available in Amazon Bedrock](https://aws.amazon.com/blogs/aws/run-scalable-enterprise-grade-generative-ai-workloads-with-cohere-r-r-now-available-in-amazon-bedrock/)
 
-[Build enterprise-ready generative AI solutions with Cohere foundation models in Amazon Bedrock and Weaviate vector database on AWS Marketplace] (https://aws.amazon.com/blogs/machine-learning/build-enterprise-ready-generative-ai-solutions-with-cohere-foundation-models-in-amazon-bedrock-and-weaviate-vector-database-on-aws-marketplace/)
+- [Build enterprise-ready generative AI solutions with Cohere foundation models in Amazon Bedrock and Weaviate vector database on AWS Marketplace](https://aws.amazon.com/blogs/machine-learning/build-enterprise-ready-generative-ai-solutions-with-cohere-foundation-models-in-amazon-bedrock-and-weaviate-vector-database-on-aws-marketplace/)
 
-[Build financial search applications using the Amazon Bedrock Cohere multilingual embedding model](https://aws.amazon.com/blogs/machine-learning/build-financial-search-applications-using-the-amazon-bedrock-cohere-multilingual-embedding-model/)
+- [Build financial search applications using the Amazon Bedrock Cohere multilingual embedding model](https://aws.amazon.com/blogs/machine-learning/build-financial-search-applications-using-the-amazon-bedrock-cohere-multilingual-embedding-model/)
 
 ### AWS Annoucements
 
-[Command R and R+ on Amazon Bedrock](https://aws.amazon.com/about-aws/whats-new/2024/04/cohere-command-r-r-plus-amazon-bedrock/)
+- [Command R and R+ on Amazon Bedrock](https://aws.amazon.com/about-aws/whats-new/2024/04/cohere-command-r-r-plus-amazon-bedrock/)
 
-[Embed on Bedrock](https://aws.amazon.com/bedrock/cohere-command-embed/)
+- [Embed on Bedrock](https://aws.amazon.com/bedrock/cohere-command-embed/)
 
-[Command R and R+ on SageMaker Jumpstart](https://aws.amazon.com/blogs/machine-learning/cohere-command-r-and-r-are-now-available-in-amazon-sagemaker-jumpstart/)
+- [Command R and R+ on SageMaker Jumpstart](https://aws.amazon.com/blogs/machine-learning/cohere-command-r-and-r-are-now-available-in-amazon-sagemaker-jumpstart/)
 
-[Command R fine tuning](https://aws.amazon.com/blogs/machine-learning/amazon-sagemaker-unveils-the-cohere-command-r-fine-tuning-model/)
+- [Command R fine tuning](https://aws.amazon.com/blogs/machine-learning/amazon-sagemaker-unveils-the-cohere-command-r-fine-tuning-model/)
 
-[Cohere Rerank3 Nimble on SageMaker jumpstart](https://aws.amazon.com/blogs/machine-learning/cohere-rerank-3-nimble-now-generally-available-on-amazon-sagemaker-jumpstart/)
+- [Cohere Rerank3 Nimble on SageMaker jumpstart](https://aws.amazon.com/blogs/machine-learning/cohere-rerank-3-nimble-now-generally-available-on-amazon-sagemaker-jumpstart/)
 
-[Command R 08-2024 fine tuning on SageMaker](https://cohere.com/blog/fine-tuning-command0824)
+- [Command R 08-2024 fine tuning on SageMaker](https://cohere.com/blog/fine-tuning-command0824)
 
 ## Security
 
