@@ -18,4 +18,4 @@ Cohere+AWS power combination: Discover the potential of combining Cohere's cutti
 
 This workshop is perfect for developers, data scientists, and ML engineers who want to enhance their NLP skills and learn how to build powerful language models. By the end of the workshop, you'll have the knowledge and practical experience to start building your own AI solutions using Cohere and AWS. Before we get started, let’s take a deeper look into Cohere’s LLMs
 
-<<Provide Link once Available>>
+[Access the workshop](https://catalog.us-east-1.prod.workshops.aws/workshops/a7a3df78-086e-4159-8451-c1229e0f951e/en-US)
