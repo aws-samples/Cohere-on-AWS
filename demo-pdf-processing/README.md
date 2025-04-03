@@ -46,7 +46,6 @@ pip install -r requirements.txt
 
 4. Create a `.env` file in the project root and update it with your API Key:
 ```env
-COHERE_API_KEY=your_cohere_api_key_here
 FLASK_ENV=development
 FLASK_APP=app.py
 ```
