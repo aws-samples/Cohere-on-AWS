@@ -50,7 +50,12 @@ FLASK_ENV=development
 FLASK_APP=app.py
 ```
 
-
+5. Create a file at ~/.aws/credentials and update it with your AWS credentials
+```
+[default]
+aws_access_key_id = <<your_access_key>>
+aws_secret_access_key = <<your_secret_key>>>>
+```
 
 ## Project Structure
 
