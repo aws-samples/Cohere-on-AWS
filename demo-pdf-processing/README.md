@@ -24,7 +24,7 @@ An intelligent PDF processing application that allows users to upload, search, a
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/cohere-ai/solutions.git
+git clone https://github.com/aws-samples/Cohere-on-AWS
 # Navigate to this demo's directory containing the README.md you're reading
 ```
 
@@ -115,4 +115,3 @@ The application includes comprehensive error handling for:
 - API rate limits
 - Processing errors
 - Invalid file types
-
