@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Processor with Cohere</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <style>
+        /* Custom styles for drag and drop highlighting */
+        .drag-over {
+            border-color: #3B82F6 !important;
+            background-color: #EFF6FF !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen py-8">
+    <main class="max-w-4xl mx-auto px-4">
+        <div class="flex flex-col items-center mb-8">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" 
+                 alt="PDF Processor Logo" 
+                 class="h-16 w-auto mb-4">
+            <h1 class="text-3xl font-bold text-gray-800">PDF Processor with Cohere</h1>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <div id="dropZone" class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer transition duration-300 hover:border-blue-500">
+                <input type="file" id="fileInput" class="hidden" accept=".pdf">
+                <div class="space-y-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                    </svg>
+                    <div class="flex text-sm text-gray-600">
+                        <label for="fileInput" class="relative cursor-pointer rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
+                            <span>Upload a file</span>
+                        </label>
+                        <p class="pl-1">or drag and drop</p>
+                    </div>
+                    <p class="text-xs text-gray-500">PDF up to 300MB</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div id="progressContainer" class="hidden space-y-2">
+            <div class="flex justify-between text-sm text-gray-600">
+                <span>Upload progress</span>
+                <span id="progressPercentage">0%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div id="progressBar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Search Section -->
+        <div id="searchSection" class="hidden space-y-6">
+            <!-- Search Form -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">Search Content</h2>
+                <form id="searchForm" class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex-grow">
+                            <label for="searchQuery" class="block text-sm font-medium text-gray-700 mb-1">Search Query</label>
+                            <input type="text" id="searchQuery" 
+                                   class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                   placeholder="Enter your search terms...">
+                        </div>
+                        <div class="ml-4 flex items-center">
+                            <label class="inline-flex relative items-center cursor-pointer">
+                                <input type="checkbox" id="rerankToggle" class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                <span class="ml-3 text-sm font-medium text-gray-700">Include Rerank</span>
+                            </label>
+                        </div>
+                    </div>
+                    <button type="submit" 
+                            class="w-full sm:w-auto bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200">
+                        Search Document
+                    </button>
+                </form>
+                <!-- Inline Search Results -->
+                <div id="inlineSearchResults" class="hidden mt-6">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-800">Search Results</h3>
+                    <div id="inlineSearchResultsContent" class="space-y-4 divide-y divide-gray-200">
+                        <!-- Search results will be dynamically inserted here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Form -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">Ask Questions</h2>
+                <form id="chatForm" class="space-y-4">
+                    <div>
+                        <label for="chatQuery" class="block text-sm font-medium text-gray-700 mb-1">Your Question</label>
+                        <input type="text" id="chatQuery" 
+                               class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                               placeholder="Ask a question about the document...">
+                    </div>
+                    <button type="submit" 
+                            class="w-full sm:w-auto bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-200">
+                        Ask Question
+                    </button>
+                </form>
+                <!-- Inline Chat Response -->
+                <div id="inlineChatResponse" class="hidden mt-6">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-800">Answer</h3>
+                    <div id="inlineChatResponseContent" class="space-y-4">
+                        <!-- Chat response will be dynamically inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results" class="hidden space-y-6 mt-8">
+            <!-- Document Content -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">Document Content</h2>
+                <div id="contentSequence" class="space-y-4 divide-y divide-gray-200">
+                    <!-- Content will be dynamically inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loading" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full mx-4">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+                <p class="text-center mt-4 text-gray-700">Processing your document...</p>
+                <p id="loadingMessage" class="text-center mt-2 text-sm text-gray-500">This may take a few moments</p>
+            </div>
+        </div>
+
+        <!-- Error Message Template (hidden by default) -->
+        <div id="errorTemplate" class="hidden fixed bottom-4 right-4 max-w-md bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+            <span class="block sm:inline"></span>
+            <span class="absolute top-0 bottom-0 right-0 px-4 py-3">
+                <svg class="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                    <title>Close</title>
+                    <path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/>
+                </svg>
+            </span>
+        </div>
+
+        <!-- Success Message Template (hidden by default) -->
+        <div id="successTemplate" class="hidden fixed bottom-4 right-4 max-w-md bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+            <span class="block sm:inline"></span>
+            <span class="absolute top-0 bottom-0 right-0 px-4 py-3">
+                <svg class="fill-current h-6 w-6 text-green-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                    <title>Close</title>
+                    <path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/>
+                </svg>
+            </span>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-12 pb-6 text-center text-gray-500 text-sm">
+        <p>Powered by Cohere AI • PDF Processing System</p>
+    </footer>
+</body>
+</html>
