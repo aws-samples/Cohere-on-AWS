@@ -1,6 +1,6 @@
 # PDF AI Assistant
 
-An intelligent PDF processing application that allows users to upload, search, and chat with their PDF documents using Cohere's AI capabilities. The application supports large PDF files (up to 300MB) and provides semantic search and natural language interactions with document content.
+An intelligent PDF processing application that allows users to upload, search, and chat with your PDF documents using Cohere's AI capabilities. The application supports large PDF files (up to 300MB) and provides semantic search and natural language interactions with document content.
 
 ## Features
 
@@ -16,7 +16,7 @@ An intelligent PDF processing application that allows users to upload, search, a
 
 - **Backend**: Python, Flask
 - **Frontend**: JavaScript, HTML5, Tailwind CSS
-- **AI/ML**: Cohere API (embeddings and chat)
+- **AI/ML**: Cohere Models via AWS Bedrock (embeddings and chat)
 - **PDF Processing**: PyMuPDF (fitz), PyPDF2
 - **Dependencies**: See requirements.txt
 
@@ -76,6 +76,19 @@ pdf-ai-assistant/
 python app.py
 ```
 
+This Python script is designed to process PDF documents, extract text and images, compute embeddings for both, and perform search and chat functionalities using Cohere's models via AWS Bedrock.
+
+**Workflow**:
+- PDF Processing
+   - Open the PDF and process each page.
+   - Extract text, chunk it, and compute embeddings.
+   - Extract images, convert them to base64, and compute embeddings.
+- Search and Rerank
+   - Compute embeddings for a query and find similar content using dot product similarity.
+   - Optionally, rerank text results using Cohere's rerank model.
+- Chat Query
+   - Combine search results with Cohere's command model to generate text based answers and include relevant images.
+
 2. Open your browser and navigate to:
 ```
 http://127.0.0.1:5000
@@ -102,17 +115,4 @@ The application includes comprehensive error handling for:
 - API rate limits
 - Processing errors
 - Invalid file types
-
-## Future Improvements
-
-- [ ] Add support for more document formats
-- [ ] Implement document caching
-- [ ] Add batch processing capabilities
-- [ ] Enhance search algorithms
-- [ ] Add user authentication
-- [ ] Implement document history
-
-## Contact
-
-For questions and feedback, please contact [Rohit Kurhekar]
 
