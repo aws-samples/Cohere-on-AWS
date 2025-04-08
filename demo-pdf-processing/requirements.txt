@@ -1,0 +1,12 @@
+setuptools>=65.5.1
+wheel>=0.38.4
+flask>=2.0.1
+cohere>=4.39
+PyMuPDF>=1.22.5
+PyPDF2>=3.0.1
+numpy>=1.21.0
+python-dotenv>=1.0.0
+Werkzeug>=2.0.1
+Pillow>=10.0.0
+cohere-aws
+boto3
