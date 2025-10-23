@@ -14,6 +14,12 @@ import cohere_aws
 import json
 import boto3
 
+# AWS Configuration
+AWS_REGION = "us-west-2"  # Define AWS region for the application
+EMBEDDING_MODEL_ID = "us.cohere.embed-v4:0"
+RERANK_MODEL_ID = "cohere.rerank-v3-5:0"
+CHAT_MODEL_ID = "cohere.command-r-plus-v1:0"
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -28,15 +34,15 @@ class RateLimiter:
         self.max_requests = max_requests
         self.time_window = time_window
         self.requests = []
-        
+
     def wait_if_needed(self):
         """Wait if rate limit is exceeded"""
         now = datetime.now()
-        
+
         # Remove old requests outside the time window
-        self.requests = [req_time for req_time in self.requests 
+        self.requests = [req_time for req_time in self.requests
                         if now - req_time < timedelta(seconds=self.time_window)]
-        
+
         if len(self.requests) >= self.max_requests:
             # Calculate how long to wait
             oldest_request = self.requests[0]
@@ -45,7 +51,7 @@ class RateLimiter:
                 logger.info(f"Rate limit reached. Waiting {wait_time:.2f} seconds...")
                 time.sleep(wait_time)
             self.requests = self.requests[1:]
-        
+
         self.requests.append(now)
 
 class PDFProcessorCohere:
@@ -56,17 +62,27 @@ class PDFProcessorCohere:
         # Initialize rate limiter for 40 requests per minute
         self.rate_limiter = RateLimiter(max_requests=40, time_window=60)
 
+        # Initialize AWS clients once
+        self.bedrock_runtime = boto3.client(
+            service_name="bedrock-runtime",
+            region_name=AWS_REGION
+        )
+        self.bedrock_agent_runtime = boto3.client(
+            'bedrock-agent-runtime',
+            region_name=AWS_REGION
+        )
+
     def chunk_text(self, text: str) -> List[str]:
         """Split text into chunks while preserving sentence boundaries"""
         sentences = text.replace('\n', ' ').split('. ')
         chunks = []
         current_chunk = []
         current_length = 0
-        
+
         for sentence in sentences:
             sentence = sentence.strip() + '. '
             sentence_length = len(sentence)
-            
+
             if current_length + sentence_length > self.chunk_size:
                 if current_chunk:
                     chunks.append(''.join(current_chunk))
@@ -75,33 +91,29 @@ class PDFProcessorCohere:
             else:
                 current_chunk.append(sentence)
                 current_length += sentence_length
-        
+
         if current_chunk:
             chunks.append(''.join(current_chunk))
-            
+
         return chunks
 
     def compute_embeddings(self, content_item: Dict[str, Any]) -> Optional[dict]:
         """Compute embeddings for a single content item"""
-        
-        model_id = "cohere.embed-english-v3"
-        bedrock_runtime = boto3.client(
-           service_name="bedrock-runtime",
-           region_name="us-west-2" # Replace with your AWS region
-        )
         try:
             if content_item['type'] == 'text':
                 body = json.dumps({
-                  "texts": [content_item['content']],              
-                  "input_type": "search_document"
+                  "texts": [content_item['content']],
+                  "input_type": "search_document",
+                  "embedding_types": ["float"]
                 })
-                response = bedrock_runtime.invoke_model(
+                response = self.bedrock_runtime.invoke_model(
                   body=body,
-                  modelId=model_id,
-                  contentType="application/json"
+                  modelId=EMBEDDING_MODEL_ID,
+                  contentType="application/json",
+                  accept="*/*"
                 )
-                response_body = json.loads(response.get("body").read())
-                embedding_values = response_body.get("embeddings")[0]
+                response_body = json.loads(response["body"].read())
+                embedding_values = response_body["embeddings"]["float"][0]
 
                 return {
                     'embedding': embedding_values,
@@ -110,21 +122,22 @@ class PDFProcessorCohere:
             else:  # image
                 # Apply rate limiting for image embeddings
                 self.rate_limiter.wait_if_needed()
-                
+
                 image_uri = f"data:image/{content_item['format']};base64,{content_item['base64_data']}"
                 body = json.dumps({
                   "images": [image_uri],
-                  "input_type": "image"
+                  "input_type": "search_document",
+                  "embedding_types": ["float"]
                 })
-                response = bedrock_runtime.invoke_model(
+                response = self.bedrock_runtime.invoke_model(
                   body=body,
-                  modelId=model_id,
-                  accept="application/json",
+                  modelId=EMBEDDING_MODEL_ID,
+                  accept="*/*",
                   contentType="application/json"
                 )
 
-                response_body = json.loads(response.get("body").read())
-                embedding_values = response_body.get("embeddings")[0]
+                response_body = json.loads(response["body"].read())
+                embedding_values = response_body["embeddings"]["float"][0]
                 return {
                     'embedding': embedding_values,
                     'type': 'image'
@@ -137,14 +150,14 @@ class PDFProcessorCohere:
         """Process PDF with chunked text processing and image extraction"""
         doc = fitz.open(pdf_path)
         logger.info(f"Processing PDF: {pdf_path}")
-        
+
         try:
             total_pages = len(doc)
             chunk_id = 0
             for page_num in range(total_pages):
                 page = doc[page_num]
                 logger.info(f"Processing page {page_num + 1}/{total_pages}")
-                
+
                 # Get text blocks with their coordinates
                 text = page.get_text()
                 if text.strip():
@@ -160,12 +173,12 @@ class PDFProcessorCohere:
                                 'chunk_id': chunk_id
                             }
                             chunk_id += 1
-                            
+
                             embedding_data = self.compute_embeddings(content_item)
                             if embedding_data:
                                 content_item['embedding'] = embedding_data['embedding']
                                 self.content_sequence.append(content_item)
-                
+
                 # Enhanced image and vector graphic processing
                 try:
                     # Extract images using get_images()
@@ -173,12 +186,12 @@ class PDFProcessorCohere:
                     for img_index, img in enumerate(images):
                         xref = img[0]  # Get the image reference
                         base_image = doc.extract_image(xref)
-                        
+
                         if base_image and base_image["image"]:
                             image_bytes = base_image["image"]
                             image_format = base_image["ext"].lower()
                             image_base64 = base64.b64encode(image_bytes).decode('utf-8')
-                            
+
                             image_item = {
                                 'page': page_num + 1,
                                 'index': img_index,
@@ -188,7 +201,7 @@ class PDFProcessorCohere:
                                 'chunk_id': chunk_id
                             }
                             chunk_id += 1
-                            
+
                             embedding_data = self.compute_embeddings(image_item)
                             if embedding_data:
                                 image_item['embedding'] = embedding_data['embedding']
@@ -197,7 +210,7 @@ class PDFProcessorCohere:
                     # Render vector graphics to images
                     pix = page.get_pixmap()
                     img_bytes = pix.tobytes()
-                    
+
                     if img_bytes:
                         image_base64 = base64.b64encode(img_bytes).decode('utf-8')
                         image_item = {
@@ -209,41 +222,37 @@ class PDFProcessorCohere:
                             'chunk_id': chunk_id
                         }
                         chunk_id += 1
-                        
+
                         embedding_data = self.compute_embeddings(image_item)
                         if embedding_data:
                             image_item['embedding'] = embedding_data['embedding']
                             self.content_sequence.append(image_item)
-                
+
                 except Exception as e:
                     logger.error(f"Error processing images on page {page_num + 1}: {str(e)}")
-            
+
         finally:
             doc.close()
-            
+
         logger.info(f"Completed processing PDF with {len(self.content_sequence)} items")
         return self.content_sequence
 
     def search(self, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
         """Search through embedded content using a text query"""
-        model_id = "cohere.embed-english-v3"
-        bedrock_runtime = boto3.client(
-           service_name="bedrock-runtime",
-           region_name="us-west-2" # Replace with your AWS region
-        )
-
         try:
             body = json.dumps({
                   "texts": [query],
-                  "input_type": "search_query"
+                  "input_type": "search_document",
+                  "embedding_types": ["float"]
             })
-            query_response = bedrock_runtime.invoke_model(
+            query_response = self.bedrock_runtime.invoke_model(
                   body=body,
-                  modelId=model_id,
-                  contentType="application/json"
+                  modelId=EMBEDDING_MODEL_ID,
+                  contentType="application/json",
+                  accept="*/*"
             )
-            response_body = json.loads(query_response.get("body").read())
-            query_embedding = response_body.get("embeddings")[0]
+            response_body = json.loads(query_response["body"].read())
+            query_embedding = response_body["embeddings"]["float"][0]
 
             similarities = []
             for idx, item in enumerate(self.content_sequence):
@@ -270,27 +279,25 @@ class PDFProcessorCohere:
             # Prepare documents for reranking - text only
             documents = []
             doc_mapping = []  # To maintain reference to original items
-            
+
             logger.info(f"Total items in content_sequence: {len(self.content_sequence)}")
-            
+
             for idx, item in enumerate(self.content_sequence):
                 if item['type'] == 'text':  # Only process text items
                     documents.append(item['content'])
                     doc_mapping.append(idx)
-            
+
             logger.info(f"Number of text documents collected: {len(documents)}")
-            
+
             if not documents:
                 logger.warning("No text documents found for reranking")
                 return []
-            
+
             # Log the query
             logger.info(f"Query: {query}")
-            
+
             # Perform reranking
-            bedrock_agent_runtime = boto3.client('bedrock-agent-runtime',region_name='us-west-2')
-            rerank_modelId = "cohere.rerank-v3-5:0"
-            rerank_package_arn = f"arn:aws:bedrock:us-west-2::foundation-model/{rerank_modelId}"
+            rerank_package_arn = f"arn:aws:bedrock:{AWS_REGION}::foundation-model/{RERANK_MODEL_ID}"
 
             text_sources = []
             for text in documents:
@@ -303,7 +310,7 @@ class PDFProcessorCohere:
                 }
               }
             })
-            response = bedrock_agent_runtime.rerank(
+            response = self.bedrock_agent_runtime.rerank(
              queries=[{
                 "type": "TEXT",
                 "textQuery": {
@@ -320,9 +327,9 @@ class PDFProcessorCohere:
                 }
                }
               }
-            ) 
+            )
             logger.info(f"Rerank response received with {len(response['results'])} results")
-            
+
             # Format results
             results = []
             for result in response['results']:
@@ -331,11 +338,11 @@ class PDFProcessorCohere:
                 item.pop('embedding', None)
                 item['relevance_score'] = float(result['relevanceScore'])
                 results.append(item)
-            
+
             logger.info(f"Formatted {len(results)} results for return")
-            
+
             return results
-            
+
         except Exception as e:
             logger.error(f"Error during rerank search: {str(e)}")
             logger.exception("Full traceback:")
@@ -373,7 +380,7 @@ class PDFProcessorCohere:
 
             ## Using Cohere's AWS SDK
             co = cohere_aws.Client(mode=cohere_aws.Mode.BEDROCK)
-            response = co.chat(message=message, model_id="cohere.command-r-plus-v1:0", stream=False)
+            response = co.chat(message=message, model_id=CHAT_MODEL_ID, stream=False)
 
             # Process the response
             answer_text = "No response generated"
@@ -418,13 +425,13 @@ class PDFProcessorCohere:
                 item_copy = item.copy()
                 item_copy.pop('embedding', None)
                 sequence_for_save.append(item_copy)
-                
+
             with open(os.path.join(output_dir, 'content_sequence.json'), 'w') as f:
                 import json
                 json.dump(sequence_for_save, f, indent=2)
-                
+
             logger.info(f"Results saved successfully to {output_dir}")
-                
+
         except Exception as e:
             logger.error(f"Error saving results: {str(e)}")
 
@@ -446,17 +453,17 @@ class PDFProcessorCohere:
             # If rerank is toggled on, include rerank results
             if use_rerank:
                 results['rerank_results'] = self.rerank_search(query, top_k)
-            
+
             # Add summary stats
             results['stats'] = {
                 'embed_count': len(results['embed_results']),
                 'rerank_count': len(results['rerank_results']) if results['rerank_results'] else 0
             }
-            
+
             logger.info(f"Search completed. Mode: {'both' if use_rerank else 'embedding only'}")
-            logger.info(f"Found {results['stats']['embed_count']} embedding results" + 
+            logger.info(f"Found {results['stats']['embed_count']} embedding results" +
                        (f" and {results['stats']['rerank_count']} rerank results" if use_rerank else ""))
-            
+
             return results
 
         except Exception as e:
@@ -474,7 +481,7 @@ class PDFProcessorCohere:
             # Add chunk IDs to content items
             for idx, item in enumerate(content_sequence):
                 item['chunk_id'] = idx
-            
+
             self.content_sequence = content_sequence
             # Rest of the processing code remains the same
         except Exception as e:
