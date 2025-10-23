@@ -2,7 +2,7 @@ from flask import Flask, request, render_template, jsonify, url_for, send_from_d
 from werkzeug.utils import secure_filename
 import os
 from pathlib import Path
-from pdf_processor_cohere_v5 import PDFProcessorCohere
+from pdf_processor_cohere import PDFProcessorCohere
 from dotenv import load_dotenv
 import logging
 import shutil
