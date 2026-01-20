@@ -273,80 +273,77 @@ class PDFProcessorCohere:
             logger.error(f"Error during search: {str(e)}")
             return []
 
-    def rerank_search(self, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
-        """Search through text content using Cohere's rerank model"""
-        try:
-            # Prepare documents for reranking - text only
-            documents = []
-            doc_mapping = []  # To maintain reference to original items
+    def rerank_search(self, query: str, top_k: int = 5, candidate_k: int = 30) -> List[Dict[str, Any]]:
+      """
+      Perform rerank using top candidate_k documents from embeddings
+      top_k: number of rerank results to return
+      candidate_k: number of top embedding candidates to rerank (must be <=1000)
+      """
+      try:
+        # 1️⃣ Embed the query
+        body = json.dumps({
+            "texts": [query],
+            "input_type": "search_document",
+            "embedding_types": ["float"]
+        })
+        query_response = self.bedrock_runtime.invoke_model(
+            body=body,
+            modelId=EMBEDDING_MODEL_ID,
+            contentType="application/json",
+            accept="*/*"
+        )
+        response_body = json.loads(query_response["body"].read())
+        query_embedding = response_body["embeddings"]["float"][0]
 
-            logger.info(f"Total items in content_sequence: {len(self.content_sequence)}")
+        # 2️⃣ Compute similarity with all content chunks
+        similarities = []
+        for idx, item in enumerate(self.content_sequence):
+            if item['type'] == 'text' and 'embedding' in item:
+                similarity = np.dot(query_embedding, item['embedding'])
+                similarities.append((similarity, idx))
 
-            for idx, item in enumerate(self.content_sequence):
-                if item['type'] == 'text':  # Only process text items
-                    documents.append(item['content'])
-                    doc_mapping.append(idx)
+        # 3️⃣ Pick top candidate_k chunks for rerank
+        similarities.sort(reverse=True)
+        top_candidates = similarities[:candidate_k]
 
-            logger.info(f"Number of text documents collected: {len(documents)}")
+        documents = [self.content_sequence[idx]['content'] for _, idx in top_candidates]
+        doc_mapping = [idx for _, idx in top_candidates]
 
-            if not documents:
-                logger.warning("No text documents found for reranking")
-                return []
+        # 4️⃣ Build sources for rerank
+        text_sources = [{"type": "INLINE",
+                         "inlineDocumentSource": {"type": "TEXT",
+                                                  "textDocument": {"text": doc}}}
+                        for doc in documents]
 
-            # Log the query
-            logger.info(f"Query: {query}")
-
-            # Perform reranking
-            rerank_package_arn = f"arn:aws:bedrock:{AWS_REGION}::foundation-model/{RERANK_MODEL_ID}"
-
-            text_sources = []
-            for text in documents:
-             text_sources.append({
-              "type": "INLINE",
-              "inlineDocumentSource": {
-                "type": "TEXT",
-                "textDocument": {
-                  "text": text,
+        # 5️⃣ Call rerank
+        rerank_package_arn = f"arn:aws:bedrock:{AWS_REGION}::foundation-model/{RERANK_MODEL_ID}"
+        response = self.bedrock_agent_runtime.rerank(
+            queries=[{"type": "TEXT", "textQuery": {"text": query}}],
+            sources=text_sources,
+            rerankingConfiguration={
+                "type": "BEDROCK_RERANKING_MODEL",
+                "bedrockRerankingConfiguration": {
+                    "numberOfResults": min(top_k, len(documents)),
+                    "modelConfiguration": {"modelArn": rerank_package_arn}
                 }
-              }
-            })
-            response = self.bedrock_agent_runtime.rerank(
-             queries=[{
-                "type": "TEXT",
-                "textQuery": {
-                    "text": query
-                }
-             }],
-             sources=text_sources,
-             rerankingConfiguration={
-              "type": "BEDROCK_RERANKING_MODEL",
-              "bedrockRerankingConfiguration": {
-                "numberOfResults": min(top_k, len(documents)),
-                "modelConfiguration": {
-                  "modelArn": rerank_package_arn,
-                }
-               }
-              }
-            )
-            logger.info(f"Rerank response received with {len(response['results'])} results")
+            }
+        )
 
-            # Format results
-            results = []
-            for result in response['results']:
-                idx = doc_mapping[result['index']]
-                item = self.content_sequence[idx].copy()
-                item.pop('embedding', None)
-                item['relevance_score'] = float(result['relevanceScore'])
-                results.append(item)
+        # 6️⃣ Format results
+        results = []
+        for result in response['results']:
+            idx = doc_mapping[result['index']]
+            item = self.content_sequence[idx].copy()
+            item.pop('embedding', None)
+            item['relevance_score'] = float(result['relevanceScore'])
+            results.append(item)
 
-            logger.info(f"Formatted {len(results)} results for return")
+        return results
 
-            return results
-
-        except Exception as e:
-            logger.error(f"Error during rerank search: {str(e)}")
-            logger.exception("Full traceback:")
-            return []
+      except Exception as e:
+        logger.error(f"Error during rerank search: {str(e)}")
+        logger.exception("Full traceback:")
+        return []
 
     def chat_query(self, query: str, context_results: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
         """Enhanced chat query that returns answer with relevant images"""
