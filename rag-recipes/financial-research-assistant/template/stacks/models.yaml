@@ -1,0 +1,168 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  Model layer for the Financial Research Workbench: Cohere models from AWS Marketplace on SageMaker
+  real-time endpoints, one instance each: Embed Pro (documents and queries) and Rerank Fast, plus Parse only
+  when DeployParse is true. Requires active Marketplace subscriptions to the models that are deployed.
+
+Parameters:
+  ProjectName:
+    Type: String
+    AllowedPattern: "^[a-z][a-z0-9-]{2,18}$"
+  InstanceType:
+    Type: String
+    Default: ml.g5.xlarge
+    AllowedValues: [ml.g5.xlarge, ml.g5.2xlarge]
+    Description: Instance type used by all endpoints. Every listing supports both.
+  DeployParse:
+    Type: String
+    Default: "false"
+    AllowedValues: ["true", "false"]
+    Description: Deploy the Parse endpoint (a third GPU instance). Needed only when the stack ParseMode is live.
+
+  DeployRerank:
+    Type: String
+    Default: "true"
+    AllowedValues: ["true", "false"]
+    Description: Deploy the Rerank Fast endpoint. Set to false to use a rerank endpoint you provide yourself.
+
+Conditions:
+  CreateParse: !Equals [!Ref DeployParse, "true"]
+  CreateRerank: !Equals [!Ref DeployRerank, "true"]
+
+Mappings:
+  # Marketplace model package ARNs are region specific. Only regions that have been tested are listed.
+  ModelPackages:
+    us-east-1:
+      Parse: arn:aws:sagemaker:us-east-1:865070037744:model-package/cohere-parse-v5-0-v1-0-007323aad02c35148157824829462baa
+      EmbedPro: arn:aws:sagemaker:us-east-1:865070037744:model-package/cohere-embed-v5-pro-v1-0-e1b8f02f533b30bea69454239b8a6431
+      Rerank: arn:aws:sagemaker:us-east-1:865070037744:model-package/cohere-rerank-v5-0-fast-v1-1-be1944d1f98c3e9cbbfbb8d31116e167
+
+Resources:
+  # Execution role for the model containers. Network isolation is on, so the containers cannot
+  # reach S3 or the internet; the role only needs to write logs and pull the Marketplace image.
+  ModelExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ProjectName}-sagemaker-exec"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: sagemaker.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: model-container
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/sagemaker/Endpoints/${ProjectName}-*"
+              - Effect: Allow
+                Action:
+                  - ecr:GetAuthorizationToken
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - ecr:BatchCheckLayerAvailability
+                  - ecr:GetDownloadUrlForLayer
+                  - ecr:BatchGetImage
+                Resource: !Sub "arn:${AWS::Partition}:ecr:${AWS::Region}:*:repository/*"
+
+  # ---- Parse ----
+  ParseModel:
+    Type: AWS::SageMaker::Model
+    Condition: CreateParse
+    Properties:
+      ExecutionRoleArn: !GetAtt ModelExecutionRole.Arn
+      EnableNetworkIsolation: true
+      PrimaryContainer:
+        ModelPackageName: !FindInMap [ModelPackages, !Ref "AWS::Region", Parse]
+  ParseEndpointConfig:
+    Type: AWS::SageMaker::EndpointConfig
+    Condition: CreateParse
+    Properties:
+      ProductionVariants:
+        - VariantName: AllTraffic
+          ModelName: !GetAtt ParseModel.ModelName
+          InstanceType: !Ref InstanceType
+          InitialInstanceCount: 1
+          InitialVariantWeight: 1
+          InferenceAmiVersion: al2-ami-sagemaker-inference-gpu-2
+          ContainerStartupHealthCheckTimeoutInSeconds: 900
+          ModelDataDownloadTimeoutInSeconds: 900
+  ParseEndpoint:
+    Type: AWS::SageMaker::Endpoint
+    Condition: CreateParse
+    Properties:
+      EndpointName: !Sub "${ProjectName}-parse"
+      EndpointConfigName: !GetAtt ParseEndpointConfig.EndpointConfigName
+
+  # ---- Embed Pro (index time and query time) ----
+  EmbedProModel:
+    Type: AWS::SageMaker::Model
+    Properties:
+      ExecutionRoleArn: !GetAtt ModelExecutionRole.Arn
+      EnableNetworkIsolation: true
+      PrimaryContainer:
+        ModelPackageName: !FindInMap [ModelPackages, !Ref "AWS::Region", EmbedPro]
+  EmbedProEndpointConfig:
+    Type: AWS::SageMaker::EndpointConfig
+    Properties:
+      ProductionVariants:
+        - VariantName: AllTraffic
+          ModelName: !GetAtt EmbedProModel.ModelName
+          InstanceType: !Ref InstanceType
+          InitialInstanceCount: 1
+          InitialVariantWeight: 1
+          InferenceAmiVersion: al2-ami-sagemaker-inference-gpu-2
+          ContainerStartupHealthCheckTimeoutInSeconds: 900
+          ModelDataDownloadTimeoutInSeconds: 900
+  EmbedProEndpoint:
+    Type: AWS::SageMaker::Endpoint
+    Properties:
+      EndpointName: !Sub "${ProjectName}-embed-pro"
+      EndpointConfigName: !GetAtt EmbedProEndpointConfig.EndpointConfigName
+
+  # ---- Rerank Fast ----
+  RerankModel:
+    Type: AWS::SageMaker::Model
+    Condition: CreateRerank
+    Properties:
+      ExecutionRoleArn: !GetAtt ModelExecutionRole.Arn
+      EnableNetworkIsolation: true
+      PrimaryContainer:
+        ModelPackageName: !FindInMap [ModelPackages, !Ref "AWS::Region", Rerank]
+  RerankEndpointConfig:
+    Type: AWS::SageMaker::EndpointConfig
+    Condition: CreateRerank
+    Properties:
+      ProductionVariants:
+        - VariantName: AllTraffic
+          ModelName: !GetAtt RerankModel.ModelName
+          InstanceType: !Ref InstanceType
+          InitialInstanceCount: 1
+          InitialVariantWeight: 1
+          InferenceAmiVersion: al2-ami-sagemaker-inference-gpu-2
+          ContainerStartupHealthCheckTimeoutInSeconds: 900
+          ModelDataDownloadTimeoutInSeconds: 900
+  RerankEndpoint:
+    Type: AWS::SageMaker::Endpoint
+    Condition: CreateRerank
+    Properties:
+      EndpointName: !Sub "${ProjectName}-rerank"
+      EndpointConfigName: !GetAtt RerankEndpointConfig.EndpointConfigName
+
+Outputs:
+  ParseEndpointName:
+    Condition: CreateParse
+    Value: !GetAtt ParseEndpoint.EndpointName
+  EmbedProEndpointName:
+    Value: !GetAtt EmbedProEndpoint.EndpointName
+  RerankEndpointName:
+    Condition: CreateRerank
+    Value: !GetAtt RerankEndpoint.EndpointName

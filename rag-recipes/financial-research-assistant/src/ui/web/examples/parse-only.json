@@ -1,0 +1,1268 @@
+{
+  "about": "Real tables extracted from cached Parse output (HTML tables in the page markdown) into rows. This is what a Parse-only workflow hands to a database.",
+  "caveats": [
+    "Six tables picked by a size and numeric score, then checked by hand against their page images; every subtotal and total adds up.",
+    "Cells are as Parse returned them: merged cells are not expanded, and text outside the table (titles, units such as \"In millions\") is not included.",
+    "Page numbers are PDF page numbers. This is a spot check of the output, not a measure of Parse's accuracy."
+  ],
+  "examples": [
+    {
+      "doc_id": "bank_of_america_2024",
+      "page_number": 92,
+      "page_label": 93,
+      "image_key": "corpus/vidore-v3-finance-en/pages/bank_of_america_2024/0092.webp",
+      "score": 1.0,
+      "n_rows": 31,
+      "n_cols": 4,
+      "header": [
+        "",
+        "2024",
+        "2023",
+        "2022"
+      ],
+      "rows": [
+        [
+          "Net interest income",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Interest income",
+          "$ 146,607",
+          "$ 130,262",
+          "$ 72,565"
+        ],
+        [
+          "Interest expense",
+          "90,547",
+          "73,331",
+          "20,103"
+        ],
+        [
+          "Net interest income",
+          "56,060",
+          "56,931",
+          "52,462"
+        ],
+        [
+          "Noninterest income",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Fees and commissions",
+          "36,291",
+          "32,009",
+          "33,212"
+        ],
+        [
+          "Market making and similar activities",
+          "12,967",
+          "12,732",
+          "12,075"
+        ],
+        [
+          "Other income (loss)",
+          "(3,431)",
+          "(3,091)",
+          "(2,799)"
+        ],
+        [
+          "Total noninterest income",
+          "45,827",
+          "41,650",
+          "42,488"
+        ],
+        [
+          "Total revenue, net of interest expense",
+          "101,887",
+          "98,581",
+          "94,950"
+        ],
+        [
+          "Provision for credit losses",
+          "5,821",
+          "4,394",
+          "2,543"
+        ],
+        [
+          "Noninterest expense",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Compensation and benefits",
+          "40,182",
+          "38,330",
+          "36,447"
+        ],
+        [
+          "Occupancy and equipment",
+          "7,289",
+          "7,164",
+          "7,071"
+        ],
+        [
+          "Information processing and communications",
+          "7,231",
+          "6,707",
+          "6,279"
+        ],
+        [
+          "Product delivery and transaction related",
+          "3,494",
+          "3,608",
+          "3,653"
+        ],
+        [
+          "Professional fees",
+          "2,669",
+          "2,159",
+          "2,142"
+        ],
+        [
+          "Marketing",
+          "1,956",
+          "1,927",
+          "1,825"
+        ],
+        [
+          "Other general operating",
+          "3,991",
+          "5,950",
+          "4,021"
+        ],
+        [
+          "Total noninterest expense",
+          "66,812",
+          "65,845",
+          "61,438"
+        ],
+        [
+          "Income before income taxes",
+          "29,254",
+          "28,342",
+          "30,969"
+        ],
+        [
+          "Income tax expense",
+          "2,122",
+          "1,827",
+          "3,441"
+        ],
+        [
+          "Net income",
+          "$ 27,132",
+          "$ 26,515",
+          "$ 27,528"
+        ],
+        [
+          "Preferred stock dividends",
+          "1,629",
+          "1,649",
+          "1,513"
+        ],
+        [
+          "Net income applicable to common shareholders",
+          "$ 25,503",
+          "$ 24,866",
+          "$ 26,015"
+        ],
+        [
+          "Per common share information",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Earnings",
+          "$ 3.25",
+          "$ 3.10",
+          "$ 3.21"
+        ],
+        [
+          "Diluted earnings",
+          "3.21",
+          "3.08",
+          "3.19"
+        ],
+        [
+          "Average common shares issued and outstanding",
+          "7,855.5",
+          "8,028.6",
+          "8,113.7"
+        ],
+        [
+          "Average diluted common shares issued and outstanding",
+          "7,935.8",
+          "8,080.5",
+          "8,167.5"
+        ]
+      ]
+    },
+    {
+      "doc_id": "bank_of_america_2024",
+      "page_number": 104,
+      "page_label": 105,
+      "image_key": "corpus/vidore-v3-finance-en/pages/bank_of_america_2024/0104.webp",
+      "score": 1.0,
+      "n_rows": 39,
+      "n_cols": 4,
+      "header": [
+        "(Dollars in millions)",
+        "2024",
+        "2023",
+        "2022"
+      ],
+      "rows": [
+        [
+          "Net interest income",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Interest income",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Loans and leases",
+          "$ 61,993",
+          "$ 57,124",
+          "$ 37,919"
+        ],
+        [
+          "Debt securities",
+          "26,007",
+          "20,226",
+          "17,127"
+        ],
+        [
+          "Federal funds sold and securities borrowed or purchased under agreements to resell",
+          "19,911",
+          "18,679",
+          "4,560"
+        ],
+        [
+          "Trading account assets",
+          "10,376",
+          "8,773",
+          "5,521"
+        ],
+        [
+          "Other interest income (1)",
+          "28,320",
+          "25,460",
+          "7,438"
+        ],
+        [
+          "Total interest income",
+          "146,607",
+          "130,262",
+          "72,565"
+        ],
+        [
+          "Interest expense",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Deposits",
+          "38,442",
+          "26,163",
+          "4,718"
+        ],
+        [
+          "Short-term borrowings",
+          "34,538",
+          "30,553",
+          "6,978"
+        ],
+        [
+          "Trading account liabilities",
+          "2,191",
+          "2,043",
+          "1,538"
+        ],
+        [
+          "Long-term debt",
+          "15,376",
+          "14,572",
+          "6,869"
+        ],
+        [
+          "Total interest expense",
+          "90,547",
+          "73,331",
+          "20,103"
+        ],
+        [
+          "Net interest income",
+          "$ 56,060",
+          "$ 56,931",
+          "$ 52,462"
+        ],
+        [
+          "Noninterest income",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Fees and commissions",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Card income",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Interchange fees (2)",
+          "$ 4,013",
+          "$ 3,983",
+          "$ 4,096"
+        ],
+        [
+          "Other card income",
+          "2,271",
+          "2,071",
+          "1,987"
+        ],
+        [
+          "Total card income",
+          "6,284",
+          "6,054",
+          "6,083"
+        ],
+        [
+          "Service charges",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Deposit-related fees",
+          "4,708",
+          "4,382",
+          "5,190"
+        ],
+        [
+          "Lending-related fees",
+          "1,347",
+          "1,302",
+          "1,215"
+        ],
+        [
+          "Total service charges",
+          "6,055",
+          "5,684",
+          "6,405"
+        ],
+        [
+          "Investment and brokerage services",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Asset management fees",
+          "13,875",
+          "12,002",
+          "12,152"
+        ],
+        [
+          "Brokerage fees",
+          "3,891",
+          "3,561",
+          "3,749"
+        ],
+        [
+          "Total investment and brokerage services",
+          "17,766",
+          "15,563",
+          "15,901"
+        ],
+        [
+          "Investment banking fees",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Underwriting income",
+          "3,275",
+          "2,235",
+          "1,970"
+        ],
+        [
+          "Syndication fees",
+          "1,221",
+          "898",
+          "1,070"
+        ],
+        [
+          "Financial advisory services",
+          "1,690",
+          "1,575",
+          "1,783"
+        ],
+        [
+          "Total investment banking fees",
+          "6,186",
+          "4,708",
+          "4,823"
+        ],
+        [
+          "Total fees and commissions",
+          "36,291",
+          "32,009",
+          "33,212"
+        ],
+        [
+          "Market making and similar activities",
+          "12,967",
+          "12,732",
+          "12,075"
+        ],
+        [
+          "Other income (loss)",
+          "(3,431)",
+          "(3,091)",
+          "(2,799)"
+        ],
+        [
+          "Total noninterest income",
+          "$ 45,827",
+          "$ 41,650",
+          "$ 42,488"
+        ]
+      ]
+    },
+    {
+      "doc_id": "morgan_stanley_2024",
+      "page_number": 51,
+      "page_label": 52,
+      "image_key": "corpus/vidore-v3-finance-en/pages/morgan_stanley_2024/0051.webp",
+      "score": 1.0,
+      "n_rows": 27,
+      "n_cols": 4,
+      "header": [
+        "$ in millions",
+        "At December 31, 2024",
+        "At December 31, 2023",
+        "Change"
+      ],
+      "rows": [
+        [
+          "CET1 capital",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Common shareholders' equity",
+          "$ 94,761",
+          "$ 90,288",
+          "$ 4,473"
+        ],
+        [
+          "Regulatory adjustments and deductions:",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Net goodwill",
+          "(16,354)",
+          "(16,394)",
+          "40"
+        ],
+        [
+          "Net intangible assets",
+          "(5,003)",
+          "(5,509)",
+          "506"
+        ],
+        [
+          "Impact of CECL transition",
+          "62",
+          "124",
+          "(61)"
+        ],
+        [
+          "Other adjustments and deductions\u00b9",
+          "1,629",
+          "939",
+          "690"
+        ],
+        [
+          "Total CET1 capital",
+          "$ 75,095",
+          "$ 69,448",
+          "$ 5,647"
+        ],
+        [
+          "Additional Tier 1 capital",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Preferred stock",
+          "$ 9,750",
+          "$ 8,750",
+          "$ 1,000"
+        ],
+        [
+          "Noncontrolling interests",
+          "807",
+          "758",
+          "49"
+        ],
+        [
+          "Additional Tier 1 capital",
+          "$ 10,557",
+          "$ 9,508",
+          "$ 1,049"
+        ],
+        [
+          "Deduction for investments in covered funds",
+          "(862)",
+          "(773)",
+          "(89)"
+        ],
+        [
+          "Total Tier 1 capital",
+          "$ 84,790",
+          "$ 78,183",
+          "$ 6,607"
+        ],
+        [
+          "Standardized Tier 2 capital",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Subordinated debt",
+          "$ 8,851",
+          "$ 8,760",
+          "$ 91"
+        ],
+        [
+          "Eligible ACL",
+          "2,065",
+          "2,051",
+          "14"
+        ],
+        [
+          "Other adjustments and deductions",
+          "(139)",
+          "(120)",
+          "(19)"
+        ],
+        [
+          "Total Standardized Tier 2 capital",
+          "$ 10,777",
+          "$ 10,691",
+          "$ 86"
+        ],
+        [
+          "Total Standardized capital",
+          "$ 95,567",
+          "$ 88,874",
+          "$ 6,693"
+        ],
+        [
+          "Advanced Tier 2 capital",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Subordinated debt",
+          "$ 8,851",
+          "$ 8,760",
+          "$ 91"
+        ],
+        [
+          "Eligible credit reserves",
+          "1,344",
+          "1,367",
+          "(23)"
+        ],
+        [
+          "Other adjustments and deductions",
+          "(139)",
+          "(120)",
+          "(19)"
+        ],
+        [
+          "Total Advanced Tier 2 capital",
+          "$ 10,056",
+          "$ 10,007",
+          "$ 49"
+        ],
+        [
+          "Total Advanced capital",
+          "$ 94,846",
+          "$ 88,190",
+          "$ 6,656"
+        ]
+      ]
+    },
+    {
+      "doc_id": "morgan_stanley_2024",
+      "page_number": 78,
+      "page_label": 79,
+      "image_key": "corpus/vidore-v3-finance-en/pages/morgan_stanley_2024/0078.webp",
+      "score": 1.0,
+      "n_rows": 36,
+      "n_cols": 4,
+      "header": [
+        "in millions, except per share data",
+        "2024",
+        "2023",
+        "2022"
+      ],
+      "rows": [
+        [
+          "Revenues",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Investment banking",
+          "$ 6,705",
+          "$ 4,948",
+          "$ 5,599"
+        ],
+        [
+          "Trading",
+          "16,763",
+          "15,263",
+          "13,928"
+        ],
+        [
+          "Investments",
+          "824",
+          "573",
+          "15"
+        ],
+        [
+          "Commissions and fees",
+          "5,094",
+          "4,537",
+          "4,938"
+        ],
+        [
+          "Asset management",
+          "22,499",
+          "19,617",
+          "19,578"
+        ],
+        [
+          "Other",
+          "1,265",
+          "975",
+          "283"
+        ],
+        [
+          "Total non-interest revenues",
+          "53,150",
+          "45,913",
+          "44,341"
+        ],
+        [
+          "Interest income\u00b9",
+          "54,135",
+          "45,849",
+          "21,595"
+        ],
+        [
+          "Interest expense\u00b9",
+          "45,524",
+          "37,619",
+          "12,268"
+        ],
+        [
+          "Net interest",
+          "8,611",
+          "8,230",
+          "9,327"
+        ],
+        [
+          "Net revenues",
+          "61,761",
+          "54,143",
+          "53,668"
+        ],
+        [
+          "Provision for credit losses",
+          "264",
+          "532",
+          "280"
+        ],
+        [
+          "Non-interest expenses",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Compensation and benefits",
+          "26,178",
+          "24,558",
+          "23,053"
+        ],
+        [
+          "Brokerage, clearing and exchange fees",
+          "4,140",
+          "3,476",
+          "3,458"
+        ],
+        [
+          "Information processing and communications",
+          "4,088",
+          "3,775",
+          "3,493"
+        ],
+        [
+          "Professional services",
+          "2,901",
+          "3,058",
+          "3,070"
+        ],
+        [
+          "Occupancy and equipment",
+          "1,905",
+          "1,895",
+          "1,729"
+        ],
+        [
+          "Marketing and business development",
+          "965",
+          "898",
+          "905"
+        ],
+        [
+          "Other",
+          "3,724",
+          "4,138",
+          "3,591"
+        ],
+        [
+          "Total non-interest expenses",
+          "43,901",
+          "41,798",
+          "39,299"
+        ],
+        [
+          "Income before provision for income taxes",
+          "17,596",
+          "11,813",
+          "14,089"
+        ],
+        [
+          "Provision for income taxes",
+          "4,067",
+          "2,583",
+          "2,910"
+        ],
+        [
+          "Net income",
+          "$ 13,529",
+          "$ 9,230",
+          "$ 11,179"
+        ],
+        [
+          "Net income applicable to noncontrolling interests",
+          "139",
+          "143",
+          "150"
+        ],
+        [
+          "Net income applicable to Morgan Stanley",
+          "$ 13,390",
+          "$ 9,087",
+          "$ 11,029"
+        ],
+        [
+          "Preferred stock dividends",
+          "590",
+          "557",
+          "489"
+        ],
+        [
+          "Earnings applicable to Morgan Stanley common shareholders",
+          "$ 12,800",
+          "$ 8,530",
+          "$ 10,540"
+        ],
+        [
+          "Earnings per common share",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Basic",
+          "$ 8.04",
+          "$ 5.24",
+          "$ 6.23"
+        ],
+        [
+          "Diluted",
+          "7.95",
+          "5.18",
+          "6.15"
+        ],
+        [
+          "Average common shares outstanding",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Basic",
+          "1,591",
+          "1,628",
+          "1,691"
+        ],
+        [
+          "Diluted",
+          "1,611",
+          "1,646",
+          "1,713"
+        ]
+      ]
+    },
+    {
+      "doc_id": "wells_fargo_2024",
+      "page_number": 217,
+      "page_label": 218,
+      "image_key": "corpus/vidore-v3-finance-en/pages/wells_fargo_2024/0217.webp",
+      "score": 1.0,
+      "n_rows": 41,
+      "n_cols": 3,
+      "header": [
+        "(in millions, except shares)",
+        "Dec 31, 2024",
+        "Dec 31, 2023"
+      ],
+      "rows": [
+        [
+          "Assets",
+          "",
+          ""
+        ],
+        [
+          "Cash and due from banks",
+          "$ 37,080",
+          "33,026"
+        ],
+        [
+          "Interest-earning deposits with banks",
+          "166,281",
+          "204,193"
+        ],
+        [
+          "Federal funds sold and securities purchased under resale agreements",
+          "105,330",
+          "80,456"
+        ],
+        [
+          "Debt securities:",
+          "",
+          ""
+        ],
+        [
+          "Trading, at fair value (includes assets pledged as collateral of $86,142 and $62,537)",
+          "121,205",
+          "97,302"
+        ],
+        [
+          "Available-for-sale, at fair value (amortized cost of $170,607 and $137,155, and includes assets pledged as collateral of $3,078 and $5,055)",
+          "162,978",
+          "130,448"
+        ],
+        [
+          "Held-to-maturity, at amortized cost (fair value $193,779 and $227,316)",
+          "234,948",
+          "262,708"
+        ],
+        [
+          "Loans held for sale (includes $4,713 and $2,892 carried at fair value)",
+          "6,260",
+          "4,936"
+        ],
+        [
+          "Loans",
+          "912,745",
+          "936,682"
+        ],
+        [
+          "Allowance for loan losses",
+          "(14,183)",
+          "(14,606)"
+        ],
+        [
+          "Net loans",
+          "898,562",
+          "922,076"
+        ],
+        [
+          "Mortgage servicing rights (includes $6,844 and $7,468 carried at fair value)",
+          "7,779",
+          "8,508"
+        ],
+        [
+          "Premises and equipment, net",
+          "10,297",
+          "9,266"
+        ],
+        [
+          "Goodwill",
+          "25,167",
+          "25,175"
+        ],
+        [
+          "Derivative assets",
+          "20,012",
+          "18,223"
+        ],
+        [
+          "Equity securities (includes $22,322 and $19,841 carried at fair value; and assets pledged as collateral of $9,774 and $2,683)",
+          "60,644",
+          "57,336"
+        ],
+        [
+          "Other assets (includes $168 and $49 carried at fair value)",
+          "73,302",
+          "78,815"
+        ],
+        [
+          "Total assets (1)",
+          "$ 1,929,845",
+          "1,932,468"
+        ],
+        [
+          "Liabilities",
+          "",
+          ""
+        ],
+        [
+          "Noninterest-bearing deposits",
+          "$ 383,616",
+          "360,279"
+        ],
+        [
+          "Interest-bearing deposits (includes $318 and $1,297 carried at fair value)",
+          "988,188",
+          "997,894"
+        ],
+        [
+          "Total deposits",
+          "1,371,804",
+          "1,358,173"
+        ],
+        [
+          "Short-term borrowings (includes $266 and $219 carried at fair value)",
+          "108,806",
+          "89,559"
+        ],
+        [
+          "Derivative liabilities",
+          "16,335",
+          "18,495"
+        ],
+        [
+          "Accrued expenses and other liabilities (includes $28,530 and $25,335 carried at fair value)",
+          "78,756",
+          "71,210"
+        ],
+        [
+          "Long-term debt (includes $3,495 and $2,308 carried at fair value)",
+          "173,078",
+          "207,588"
+        ],
+        [
+          "Total liabilities (2)",
+          "1,748,779",
+          "1,745,025"
+        ],
+        [
+          "Equity",
+          "",
+          ""
+        ],
+        [
+          "Wells Fargo stockholders' equity:",
+          "",
+          ""
+        ],
+        [
+          "Preferred stock - aggregate liquidation preference of $19,376 and $20,216",
+          "18,608",
+          "19,448"
+        ],
+        [
+          "Common stock - $1-2/3 par value, authorized 9,000,000,000 shares; issued 5,481,811,474 shares",
+          "9,136",
+          "9,136"
+        ],
+        [
+          "Additional paid-in capital",
+          "60,817",
+          "60,555"
+        ],
+        [
+          "Retained earnings",
+          "214,198",
+          "201,136"
+        ],
+        [
+          "Accumulated other comprehensive loss",
+          "(12,176)",
+          "(11,580)"
+        ],
+        [
+          "Treasury stock, at cost - 2,192,867,645 shares and 1,882,948,892 shares",
+          "(111,463)",
+          "(92,960)"
+        ],
+        [
+          "Total Wells Fargo stockholders' equity",
+          "179,120",
+          "185,735"
+        ],
+        [
+          "Noncontrolling interests",
+          "1,946",
+          "1,708"
+        ],
+        [
+          "Total equity",
+          "181,066",
+          "187,443"
+        ],
+        [
+          "Total liabilities and equity",
+          "$ 1,929,845",
+          "1,932,468"
+        ]
+      ]
+    },
+    {
+      "doc_id": "wells_fargo_2024",
+      "page_number": 243,
+      "page_label": 244,
+      "image_key": "corpus/vidore-v3-finance-en/pages/wells_fargo_2024/0243.webp",
+      "score": 0.99,
+      "n_rows": 38,
+      "n_cols": 3,
+      "header": [
+        "",
+        "Year ended December 31,"
+      ],
+      "rows": [
+        [
+          "($ in millions)",
+          "2024",
+          "2023"
+        ],
+        [
+          "Balance, beginning of period",
+          "$ 15,088",
+          "13,609"
+        ],
+        [
+          "Cumulative effect from change in accounting policy (1)",
+          "\u2014",
+          "(429)"
+        ],
+        [
+          "Balance, beginning of period, adjusted",
+          "15,088",
+          "13,180"
+        ],
+        [
+          "Provision for credit losses",
+          "4,330",
+          "5,385"
+        ],
+        [
+          "Loan charge-offs:",
+          "",
+          ""
+        ],
+        [
+          "Commercial and industrial",
+          "(729)",
+          "(510)"
+        ],
+        [
+          "Commercial real estate",
+          "(945)",
+          "(593)"
+        ],
+        [
+          "Lease financing",
+          "(52)",
+          "(31)"
+        ],
+        [
+          "Total commercial",
+          "(1,726)",
+          "(1,134)"
+        ],
+        [
+          "Residential mortgage",
+          "(64)",
+          "(136)"
+        ],
+        [
+          "Credit card",
+          "(2,842)",
+          "(2,009)"
+        ],
+        [
+          "Auto",
+          "(652)",
+          "(832)"
+        ],
+        [
+          "Other consumer",
+          "(560)",
+          "(485)"
+        ],
+        [
+          "Total consumer",
+          "(4,118)",
+          "(3,462)"
+        ],
+        [
+          "Total loan charge-offs",
+          "(5,844)",
+          "(4,596)"
+        ],
+        [
+          "Loan recoveries:",
+          "",
+          ""
+        ],
+        [
+          "Commercial and industrial",
+          "132",
+          "165"
+        ],
+        [
+          "Commercial real estate",
+          "42",
+          "27"
+        ],
+        [
+          "Lease financing",
+          "17",
+          "19"
+        ],
+        [
+          "Total commercial",
+          "191",
+          "211"
+        ],
+        [
+          "Residential mortgage",
+          "133",
+          "160"
+        ],
+        [
+          "Credit card",
+          "387",
+          "329"
+        ],
+        [
+          "Auto",
+          "296",
+          "354"
+        ],
+        [
+          "Other consumer",
+          "65",
+          "72"
+        ],
+        [
+          "Total consumer",
+          "881",
+          "915"
+        ],
+        [
+          "Total loan recoveries",
+          "1,072",
+          "1,126"
+        ],
+        [
+          "Net loan charge-offs",
+          "(4,772)",
+          "(3,470)"
+        ],
+        [
+          "Other",
+          "(10)",
+          "(7)"
+        ],
+        [
+          "Balance, end of period",
+          "$ 14,636",
+          "15,088"
+        ],
+        [
+          "Components:",
+          "",
+          ""
+        ],
+        [
+          "Allowance for loan losses",
+          "$ 14,183",
+          "14,606"
+        ],
+        [
+          "Allowance for unfunded credit commitments",
+          "453",
+          "482"
+        ],
+        [
+          "Allowance for credit losses",
+          "$ 14,636",
+          "15,088"
+        ],
+        [
+          "Net loan charge-offs as a percentage of average total loans",
+          "0.52 %",
+          "0.37"
+        ],
+        [
+          "Allowance for loan losses as a percentage of total loans",
+          "1.55",
+          "1.56"
+        ],
+        [
+          "Allowance for credit losses for loans as a percentage of total loans",
+          "1.60",
+          "1.61"
+        ]
+      ]
+    }
+  ]
+}

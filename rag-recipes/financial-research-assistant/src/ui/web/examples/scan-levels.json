@@ -1,0 +1,184 @@
+{
+  "about": "Answers from a degraded page image alone and from the text Parse extracted from it, same questions and pages.",
+  "caveats": [
+    "Small sample: these are examples that show the shape of the effect, not a benchmark.",
+    "The pages were degraded by a script (smaller size, blur, noise, skew, heavy JPEG), not scanned on real hardware.",
+    "The correct pages were given to Claude, so this measures reading a page, not finding it.",
+    "Answers were graded by a Claude call that did not know which version it was grading."
+  ],
+  "examples": [
+    {
+      "kind": "parse_wins",
+      "level": "medium",
+      "query_id": 98,
+      "question": "What is the comparison between Bank of America\u2019s Hispanic and Asian employees in percentage?",
+      "reference_answer": "Hispanic employees make up 19% of Bank of America\u2019s U.S.-based workforce, while Asian employees account for 14%. This means the percentage of Hispanic employees is 5 points higher than that of Asian employees.",
+      "pages": [
+        {
+          "label": "Bank of America 2024, page 6",
+          "image": "examples/scans/2887-medium.webp",
+          "parse_excerpt": "At both December 31, 2024 and 2023, the Corporation employed approximately 213,000 employees, of which 78 percent were located in the U.S. None of our U.S. employees are subject to a collective bargaining agreement. Additionally, in 2024 and 2023, the Corporation's compensation and benefits expense was $40.2 billion and $38.3 billion, or 60 percent and 58 percent, of total noninterest expense.\n\nThe following table provides our workforce data by gender (globally) and ethnicity (U.S. only).\n\n**Workforce data as of December 31, 2024**\n\n<table><thead><tr><th></th><th>Total Employees</th><th>Top Three Management Levels</th><th>Managers at All Levels</th></tr></thead><tbody><tr><td>Global employees</td><td></td><td></td><td></td></tr><tr><td>Women</td><td>50 %</td><td>42 %</td><td>42 %</td></tr><tr><td>Men</td><td>50</td><td>58</td><td>58</td></tr><tr><td>U.S. based employees</td><td></td><td></td><td></td></tr><tr><td>White</td><td>47</td><td>71</td><td>54</td></tr><tr><td>Asian</td><td>14</td><td>11</td><td>15</td></tr><tr><td>Black</td><td>15</td><td>9</td><td>11</td></tr><tr><td>Hispanic</td><td>19</td><td>7</td><td>16</td></tr><tr><td>American Indian/Alaskan Native</td><td>0.4</td><td>0.1</td><td>0.3</td></tr><tr><td>Native Hawaiian/Other Pacific Islander</td><td>0.3</td><td>0.1</td><td>0.3</td></tr><tr><td>Two or More Races</td><td>3</td><td>1</td><td>2</td></tr></tbody></table>\n\n**Talent, Inclusion and Opportunity**\n\nThe Corporation is focused on building a strong pipeline o"
+        }
+      ],
+      "answers": {
+        "parse": {
+          "verdict": "correct",
+          "answer": "According to the workforce data as of December 31, 2024, Bank of America's U.S. based employees consisted of:\n\n- Hispanic: 19% of total employees\n- Asian: 14% of total employees\n\nTherefore, Hispanic employees represented 5 percentage points more than Asian employees among the total U.S. based workforce [bank_of_america_2024 p.6]."
+        },
+        "image": {
+          "verdict": "incorrect",
+          "answer": "According to the workforce data table on [bank_of_america_2024 p.6], as of December 31, 2024:\n\n- Hispanic employees: 19%\n- Asian employees: 15%\n\nTherefore, Bank of America has 4 percentage points more Hispanic employees than Asian employees among its total workforce."
+        }
+      }
+    },
+    {
+      "kind": "parse_wins",
+      "level": "medium",
+      "query_id": 210,
+      "question": "What are the categories of unfunded credit commitments for Wells Fargo & Company in 2024 and 2025, as listed in Table 5.4?",
+      "reference_answer": "The categories of unfunded credit commitments for Wells Fargo & Company in 2024, as listed in Table 5.4, are Commercial and industrial, Commercial real estate, Residential mortgage, Credit card, and Other consumer. Data for 2025 is not provided in the document.",
+      "pages": [
+        {
+          "label": "Wells Fargo 2024, page 243",
+          "image": "examples/scans/2442-medium.webp",
+          "parse_excerpt": "# Note 5: Loans and Related Allowance for Credit Losses (continued)\n\n**Loan Purchases, Sales, and Transfers**\nTable 5.3 presents the proceeds paid or received for purchases and sales of loans and transfers from loans held for investment to mortgages/loans held for sale. The table excludes loans for which we have elected the fair value option and government insured/guaranteed loans because their loan activity normally does not impact the ACL.\n\n**Table 5.3: Loan Purchases, Sales, and Transfers**\n\n<table><thead><tr><th></th><th colspan=\"6\" style=\"text-align: center;\">Year ended December 31,</th></tr><tr><th></th><th colspan=\"3\" style=\"text-align: center;\">2024</th><th colspan=\"3\" style=\"text-align: center;\">2023</th></tr><tr><th style=\"text-align: left;\">(in millions)</th><th style=\"text-align: center;\">Commercial</th><th style=\"text-align: center;\">Consumer</th><th style=\"text-align: center;\">Total</th><th style=\"text-align: center;\">Commercial</th><th style=\"text-align: center;\">Consumer</th><th style=\"text-align: center;\">Total</th></tr></thead><tbody><tr><td style=\"text-align: left;\">Purchases</td><td style=\"text-align: right;\">$ 819</td><td style=\"text-align: right;\">4</td><td style=\"text-align: right;\">843</td><td style=\"text-align: right;\">1,340</td><td style=\"text-align: right;\">356</td><td style=\"text-align: right;\">1,646</td></tr><tr><td style=\"text-align: left;\">Sales and net transfers from loans held for investment</td><td style=\"text-align: right;\">(2,662)</td><td s"
+        }
+      ],
+      "answers": {
+        "parse": {
+          "verdict": "correct",
+          "answer": "According to Table 5.4 on page 243, the categories of unfunded credit commitments for Wells Fargo & Company are listed for December 31, 2024 and December 31, 2023 (not 2025). The categories are:\n\n**Commercial:**\n- Commercial and industrial\n- Commercial real estate\n\n**Consumer:**\n- Residential mortgage\n- Credit card\n- Other consumer\n\n[wells_fargo_2024 p.243]\n\nNote: The document only provides data for 2024 and 2023. There is no 2025 data available in the provided page."
+        },
+        "image": {
+          "verdict": "incorrect",
+          "answer": "Based on Table 5.4 on page 243, the categories of unfunded credit commitments for Wells Fargo & Company are:\n\n**2024:**\n- Credit card and other revolving credit\n- Commercial real estate\n- Other commercial\n- Residential mortgage (1)\n- Other credit\n\n**2023:**\nThe same categories are listed for 2023 as well.\n\nThe table shows \"Total consumer\" and \"Total commercial\" subtotals, with a \"Total unfunded credit commitments\" line, followed by \"Less: Commitments to lend syndicated to others\" [wells_fargo_2024 p.243].\n\nNote: The page shows data for years 2024 and 2023, not 2025."
+        }
+      }
+    },
+    {
+      "kind": "parse_wins",
+      "level": "medium",
+      "query_id": 212,
+      "question": "What was the decrease in Bank of America\u2019s Accumulated Other Comprehensive Income (OCI) losses from 2022 to 2024?",
+      "reference_answer": "The decrease in Bank of America's Accumulated Other Comprehensive Income (OCI) losses from 2022 to 2024 is $5,871 million.",
+      "pages": [
+        {
+          "label": "Bank of America 2024, page 145",
+          "image": "examples/scans/2688-medium.webp",
+          "parse_excerpt": "# NOTE 14 Accumulated Other Comprehensive Income (Loss)\n\nThe table below presents the changes in accumulated OCI after-tax for 2024, 2023 and 2022.\n\n<table><thead><tr><th>(dollars in millions)</th><th>Debt Securities</th><th>Debt Valuation Adjustments</th><th>Derivatives</th><th>Employee Benefit Plans</th><th>Foreign Currency</th><th>Total</th></tr></thead><tbody><tr><td>Balance, December 31, 2021</td><td>$ 3,645</td><td>$ (1,636)</td><td>$ 12,850</td><td>$ (13,421)</td><td>$ (281)</td><td>$ (15,104)</td></tr><tr><td>Net change</td><td>(6,028)</td><td>795</td><td>(12,955)</td><td>(667)</td><td>(37)</td><td>(18,052)</td></tr><tr><td>Balance, December 31, 2022</td><td>$ (2,983)</td><td>$ (881)</td><td>$ 11,935</td><td>$ (4,309)</td><td>$ (1,048)</td><td>$ (21,156)</td></tr><tr><td>Net change</td><td>573</td><td>(686)</td><td>3,919</td><td>(4,739)</td><td>\u2014</td><td>1,368</td></tr><tr><td>Balance, December 31, 2023</td><td>$ (2,410)</td><td>$ (1,507)</td><td>$ (8,216)</td><td>$ (4,148)</td><td>$ (1,047)</td><td>$ (17,788)</td></tr><tr><td>Net change</td><td>138</td><td>(127)</td><td>2,428</td><td>131</td><td>(87)</td><td>2,503</td></tr><tr><td>Balance, December 31, 2024</td><td>$ (2,252)</td><td>$ (1,694)</td><td>$ (5,588)</td><td>$ (4,617)</td><td>$ (1,134)</td><td>$ (15,285)</td></tr></tbody></table>\n\nThe table below presents the net change in fair value recorded in accumulated OCI net realized gains and losses reclassified into earnings and other changes for each component of "
+        }
+      ],
+      "answers": {
+        "parse": {
+          "verdict": "correct",
+          "answer": "Looking at the accumulated OCI balances from the first table on page 145:\n\n- Balance, December 31, 2022: $(21,156) million\n- Balance, December 31, 2024: $(15,285) million\n\nThe accumulated OCI loss **decreased by $5,871 million** from 2022 to 2024 (from a loss of $21,156 million to a loss of $15,285 million, representing an improvement in the company's accumulated OCI position).\n\n[bank_of_america_2024 p.145]"
+        },
+        "image": {
+          "verdict": "incorrect",
+          "answer": "Looking at the table showing changes in accumulated OCI after-tax for 2024, 2023 and 2022 [bank_of_america_2024 p.145]:\n\n- Balance, December 31, 2022: $(13,348)\n- Balance, December 31, 2024: $(15,285)\n\nThe accumulated OCI losses actually **increased** from 2022 to 2024 by $1,937 million (from $13,348 million in losses to $15,285 million in losses). There was not a decrease in losses, but rather an increase."
+        }
+      }
+    },
+    {
+      "kind": "parse_wins",
+      "level": "medium",
+      "query_id": 254,
+      "question": "Did digital adoption increase for Bank of America in 2024?",
+      "reference_answer": "Yes, the number of active digital banking users increased from 46,265 to 48,150 between 2023 and 2024.",
+      "pages": [
+        {
+          "label": "Bank of America 2024, page 40",
+          "image": "examples/scans/2875-medium.webp",
+          "parse_excerpt": "expense, partially offset by lower provision for credit losses. Net interest income decreased $1.3 billion to $21.2 billion primarily driven by lower deposit balances. Noninterest income was $2.8 billion, relatively unchanged from the same period a year ago.\n\nThe provision for credit losses decreased $188 million to $303 million primarily driven by lower overdraft losses from fraud activity. Noninterest expense increased $349 million to $13.7 billion primarily driven by investments in the business, including people, technology and operations.\n\nAverage deposits decreased $47.0 billion to $940.7 billion primarily due to net outflows of $54.6 billion in money market savings and $20.6 billion in checking, partially offset by growth in time deposits of $37.2 billion.\n\nThe table below provides key performance indicators for Deposits. Management uses these metrics, and we believe they are useful to investors because they provide additional information to evaluate our deposit profitability and digital/mobile trends.\n\nNet income for Consumer Lending increased $334 million to $3.2 billion primarily driven by higher revenue, partially offset by higher noninterest expense. Net interest income increased $717 million to $11.9 billion primarily due to the impact of higher loan balances. Noninterest income increased $85 million to $5.5 billion, primarily driven by higher card income.\n\nThe provision for credit losses was $4.7 billion, relatively unchanged from the same period a year ago. Noni"
+        }
+      ],
+      "answers": {
+        "parse": {
+          "verdict": "correct",
+          "answer": "Yes, digital adoption increased for Bank of America in 2024.\n\nAccording to the Key Statistics - Deposits table [bank_of_america_2024 p.40]:\n\n- **Active digital banking users** increased from 46,265 thousand in 2023 to 48,150 thousand in 2024 (an increase of approximately 1.9 million users)\n\n- **Active mobile banking users** increased from 17,927 thousand in 2023 to 19,956 thousand in 2024\n\nThe report also notes: \"Active mobile banking users increased approximately two million, reflecting client growth and continuing changes in our clients' banking preferences.\" [bank_of_america_2024 p.40]\n\nThis digital growth occurred even as the physical footprint decreased, with a net decrease of 145 financial centers and 275 ATMs as the bank \"continued to optimize our consumer banking network.\" [bank_of_america_2024 p.40]"
+        },
+        "image": {
+          "verdict": "incorrect",
+          "answer": "Yes, digital adoption increased for Bank of America in 2024. According to the Key Statistics - Deposits section:\n\n- Active digital banking users increased to **48,130** thousand in 2024 from 48,265 thousand in 2023 [bank_of_america_2024 p.40]\n\nWait, I need to correct this - the digital banking users actually decreased slightly from 48,265 to 48,130 thousand.\n\nHowever, looking at active mobile banking users:\n- Active mobile banking users increased to **39,036** thousand in 2024 from 37,925 thousand in 2023 [bank_of_america_2024 p.40]\n\nSo mobile banking adoption specifically increased in 2024, though overall digital banking users saw a slight decrease."
+        }
+      }
+    },
+    {
+      "kind": "image_wins",
+      "level": "heavy",
+      "query_id": 237,
+      "question": "Is benchmarking to market transactions part of Wells Fargo & Company's Level 3 monitoring procedures?",
+      "reference_answer": "Yes, benchmarking to market transactions is part of Wells Fargo & Company's Level 3 monitoring procedures.",
+      "pages": [
+        {
+          "label": "Wells Fargo 2024, page 277",
+          "image": "examples/scans/2479-heavy.webp",
+          "parse_excerpt": "# Note 15: Fair Value Measurements (Continued)\n\n## Table 3: Areas and Liquidity Valuation Procedures\n\nWe are primarily interested in the value of our assets. These assets are the total interest payable and the total equity. Equity is defined as the amount of cash and cash equivalents less liabilities. The valuation procedures may be summarized as follows:\n\n**INTANGIBLE, NON-LIQUID, VALUABLE:** Under Section 7, Title VII, assets are listed on an annual basis, both as determined upon New or Current accounting standards, and at the date of the latest report in fiscal calendar year end. Assets are classified under these categories as follows:\n\n*   **Intangible assets**\u2014These are intangible assets that are not tangible and are valued at fair market value. Examples of intangible assets include patents, goodwill, deferred income tax assets, accumulated other comprehensive income, and certain other intangible assets such as certain acquired companies or subsidiaries.\n*   **Non-tangible assets**\u2014These are intangible assets that are not tangible but are recognized in the company's financial statements as a component of long-term investments. Examples of non-tangible assets include certain acquired companies or subsidiaries, certain acquired companies or subsidiaries with significant future operating income, and certain other intangible assets such as certain acquired companies or subsidiaries with significant future operating income.\n\nThe intangible assets of the Company are valued usi"
+        }
+      ],
+      "answers": {
+        "parse": {
+          "verdict": "incorrect",
+          "answer": "I cannot answer this question based on the provided page. The page [wells_fargo_2024 p.277] appears to contain corrupted or repetitive text that does not provide coherent information about Wells Fargo's Level 3 monitoring procedures or benchmarking practices. The content consists largely of repetitive statements about intangible assets that do not address the question about Level 3 fair value measurement monitoring procedures."
+        },
+        "image": {
+          "verdict": "correct",
+          "answer": "Yes, benchmarking to market transactions is part of Wells Fargo & Company's Level 3 monitoring procedures. According to the document, \"Level 3 monitoring procedures include benchmarking to market transactions, back-testing, and variance analysis\" [wells_fargo_2024 p.277]."
+        }
+      }
+    },
+    {
+      "kind": "image_wins",
+      "level": "heavy",
+      "query_id": 238,
+      "question": "What process is conducted to compare modeled values to actual realized results for Level 3 assets in Wells Fargo?",
+      "reference_answer": "Wells Fargo conducts back-testing of modeled fair values to actual realized transactions to compare modeled values to actual realized results for Level 3 assets.",
+      "pages": [
+        {
+          "label": "Wells Fargo 2024, page 277",
+          "image": "examples/scans/2479-heavy.webp",
+          "parse_excerpt": "# Note 15: Fair Value Measurements (Continued)\n\n## Table 3: Areas and Liquidity Valuation Procedures\n\nWe are primarily interested in the value of our assets. These assets are the total interest payable and the total equity. Equity is defined as the amount of cash and cash equivalents less liabilities. The valuation procedures may be summarized as follows:\n\n**INTANGIBLE, NON-LIQUID, VALUABLE:** Under Section 7, Title VII, assets are listed on an annual basis, both as determined upon New or Current accounting standards, and at the date of the latest report in fiscal calendar year end. Assets are classified under these categories as follows:\n\n*   **Intangible assets**\u2014These are intangible assets that are not tangible and are valued at fair market value. Examples of intangible assets include patents, goodwill, deferred income tax assets, accumulated other comprehensive income, and certain other intangible assets such as certain acquired companies or subsidiaries.\n*   **Non-tangible assets**\u2014These are intangible assets that are not tangible but are recognized in the company's financial statements as a component of long-term investments. Examples of non-tangible assets include certain acquired companies or subsidiaries, certain acquired companies or subsidiaries with significant future operating income, and certain other intangible assets such as certain acquired companies or subsidiaries with significant future operating income.\n\nThe intangible assets of the Company are valued usi"
+        }
+      ],
+      "answers": {
+        "parse": {
+          "verdict": "incorrect",
+          "answer": "I cannot answer this question based on the provided page. The page [wells_fargo_2024 p.277] appears to contain corrupted or repetitive text about intangible assets and does not contain information about the process for comparing modeled values to actual realized results for Level 3 assets at Wells Fargo."
+        },
+        "image": {
+          "verdict": "correct",
+          "answer": "According to the document, Wells Fargo conducts a \"back-testing\" process to compare modeled values to actual realized results for Level 3 assets. Specifically, the page states: \"We conduct back-testing to compare modeled values to actual realized results for Level 3 assets\" [wells_fargo_2024 p.277]."
+        }
+      }
+    },
+    {
+      "kind": "image_wins",
+      "level": "heavy",
+      "query_id": 276,
+      "question": "Does Bank of America maintain a global liquidity sources buffer of $953B in 2024 as a part of its liquidity management strategy?",
+      "reference_answer": "Yes, the Bank of America maintains a global liquidity sources buffer of $953B in 2024 as part of its liquidity management strategy.",
+      "pages": [
+        {
+          "label": "Bank of America 2024, page 57",
+          "image": "examples/scans/2894-heavy.webp",
+          "parse_excerpt": "The Board of Directors (continued) and further management information shall be provided by the Board of Directors (continued) and further management information shall be provided by the Board of Directors (continued).\n\n**Executive Compensation**\n\nThe Board of Directors (continued) and further management information shall be provided by the Board of Directors (continued).\n\n**Compensation and Director Fees**\n\nThe Board of Directors (continued) and further management information shall be provided by the Board of Directors (continued).\n\n**Compensation for Executive Officers**\n\nThe Board of Directors (continued) and further management information shall be provided by the Board of Directors (continued).\n\n**Compensation for Executive Officers (continued)**\n\nThe Board of Directors (continued) and further management information shall be provided by the Board of Directors (continued).\n\n**Compensation for Executive Officers (continued) \u2014 Stock Options**\n\nThe Board of Directors (continued) and further management information shall be provided by the Board of Directors (continued).\n\n**Compensation for Executive Officers (continued) \u2014 Equity Awards**\n\nThe Board of Directors (continued) and further management information shall be provided by the Board of Directors (continued).\n\n**Compensation for Executive Officers (continued) \u2014 Other Benefits**\n\nThe Board of Directors (continued) and further management information shall be provided by the Board of Directors (continued).\n\n**Compensation for "
+        },
+        {
+          "label": "Bank of America 2024, page 58",
+          "image": "examples/scans/2895-heavy.webp",
+          "parse_excerpt": "# Average Global Liquidity Sources Compilation\n\n**Table 1: Average Global Liquidity Sources**\n\n<table><thead><tr><th></th><th>2014</th><th>2013</th><th>2012</th></tr></thead><tbody><tr><td>Central Bank Reserves</td><td>$3.5</td><td>$3.6</td><td>$3.8</td></tr><tr><td>Commercial Paper</td><td>0.9</td><td>0.9</td><td>0.9</td></tr><tr><td>Corporate Bonds</td><td>0.4</td><td>0.4</td><td>0.4</td></tr><tr><td>Government Bonds</td><td>0.4</td><td>0.4</td><td>0.4</td></tr><tr><td>Other Foreign Exchange Reserves</td><td>0.2</td><td>0.2</td><td>0.2</td></tr><tr><td>Total Global Liquidity Sources</td><td>$4.7</td><td>$4.8</td><td>$4.9</td></tr></tbody></table>\n\nOur GDP is approximately 20% larger than the size of the average US GDP. Since there are about 50% of the world's population living in urban areas, this means that the average US GDP per capita is about $1,000 a year or a human dollar. The GDP is the aggregate of production, sales, and investment by all sectors of the economy. In addition to the GDP is the sum of the products of each of the country's constituent states by nature of its population, oil and gas production, mining, agriculture, manufacturing, services, and trade, and finally, the balance of payments. In other words, the GDP is the sum of the products of all these sectors of the economy. The total of the products of all sectors of the economy is known as the Gross Domestic Product (GDP). Since 1947, the GDP has been measured in constant terms (i.e., after inflation) b"
+        }
+      ],
+      "answers": {
+        "parse": {
+          "verdict": "incorrect",
+          "answer": "The provided pages do not contain information about Bank of America maintaining a global liquidity sources buffer of $953B in 2024. \n\nPage 57 contains only repetitive placeholder text about Board of Directors and compensation matters with no actual financial data [bank_of_america_2024 p.57].\n\nPage 58 shows a table titled \"Average Global Liquidity Sources\" but the data is only for years 2012-2014, with total global liquidity sources of $4.7B (2014), $4.8B (2013), and $4.9B (2012) [bank_of_america_2024 p.58]. This historical data does not address the 2024 figure of $953B mentioned in the question."
+        },
+        "image": {
+          "verdict": "correct",
+          "answer": "Yes, Bank of America maintains a global liquidity sources buffer of $953B in 2024 as part of its liquidity management strategy. According to the document, \"The Corporation maintains a global liquidity sources buffer of $953B, which is comprised of cash and high-quality liquid assets\" [bank_of_america_2024 p.58]."
+        }
+      }
+    }
+  ]
+}
