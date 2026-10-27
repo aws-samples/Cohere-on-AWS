@@ -18,6 +18,29 @@ A web app (sign-in required) with three tabs:
 | **Search** | The same retrieval with no generated answer. For the 168 benchmark questions, in six languages, it also shows whether a known answer page was found. In the side-by-side view, the Embed + Rerank column shows the passage Context Focus picked on each page. |
 | **Parse** | What Cohere Parse adds, from precomputed results shipped in this repository (no Parse endpoint needed): tables as rows you can download as CSV, and a scan-quality test comparing Claude reading a degraded page image with Claude reading the text Parse extracted. |
 
+What you see when you deploy and run it yourself may differ from the screenshots below.
+
+<details>
+<summary><strong>Assistant</strong>: a cited answer, the steps that found the pages, and the passages Context Focus sent to Claude</summary>
+
+![Assistant tab](docs/screenshots/assistant.png)
+
+</details>
+
+<details>
+<summary><strong>Search</strong>: Embed alone next to Embed + Rerank on a benchmark question, with the known answer pages marked</summary>
+
+![Search tab](docs/screenshots/search.png)
+
+</details>
+
+<details>
+<summary><strong>Parse</strong>: a table from a page as rows, next to the page it came from</summary>
+
+![Parse tab](docs/screenshots/parse.png)
+
+</details>
+
 Search and the Assistant use **Embed + Rerank**. In the full design, Parse is an optional stage for scans, pages with little text, or when you need tables as data; this demo does not run it and shows its saved results in the Parse tab instead. The [decision tree](docs/architecture/decision-tree.png) and the [pipeline with its optional stages](docs/architecture/pipeline-optional-stages.png) show when to use each stage.
 
 The documents are in English. Questions in the other five languages find the same English pages, which is what you would see with a multilingual archive.
