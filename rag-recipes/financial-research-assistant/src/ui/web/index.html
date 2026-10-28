@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Research and Diligence Workbench</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="topbar">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+        <rect x="2" y="2" width="28" height="28" rx="7" class="logo-bg"/>
+        <path d="M9 21l5-6 4 3 6-8" class="logo-line"/>
+        <circle cx="24" cy="10" r="2" class="logo-dot"/>
+      </svg>
+      <div>
+        <h1 id="app-title">Research and Diligence Workbench</h1>
+        <p class="tagline">Cohere Embed, Rerank and Parse on Amazon SageMaker, answers by Claude on Amazon Bedrock</p>
+      </div>
+    </div>
+    <div id="session" hidden>
+      <span id="user-email"></span>
+      <button id="sign-out" class="ghost small" type="button">Sign out</button>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- Sign in -->
+    <section id="view-login" class="card narrow" hidden>
+      <h2>Sign in</h2>
+      <p class="muted">Use the account created for this deployment.</p>
+      <form id="login-form" autocomplete="on">
+        <label for="login-email">Email</label>
+        <input id="login-email" name="email" type="email" autocomplete="username" required>
+        <label for="login-password">Password</label>
+        <input id="login-password" name="password" type="password" autocomplete="current-password" required>
+        <button type="submit" class="primary wide">Sign in</button>
+      </form>
+      <form id="new-password-form" autocomplete="off" hidden>
+        <p>Choose a new password to finish signing in (at least 12 characters, with upper and lower case letters, a number and a symbol).</p>
+        <label for="new-password">New password</label>
+        <input id="new-password" type="password" autocomplete="new-password" minlength="12" required>
+        <button type="submit" class="primary wide">Set password</button>
+      </form>
+      <p id="login-error" class="error" role="alert" hidden></p>
+    </section>
+
+    <!-- App -->
+    <div id="view-app" hidden>
+      <nav class="tabs" role="tablist" aria-label="Sections">
+        <button role="tab" id="tab-ask" aria-controls="panel-ask" aria-selected="true" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span>Assistant</span>
+        </button>
+        <button role="tab" id="tab-search" aria-controls="panel-search" aria-selected="false" tabindex="-1" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <span>Search</span>
+        </button>
+        <button role="tab" id="tab-parse" aria-controls="panel-parse" aria-selected="false" tabindex="-1" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
+          <span>Parse</span>
+        </button>
+      </nav>
+
+      <!-- Assistant: question in, cited answer out -->
+      <section id="panel-ask" role="tabpanel" aria-labelledby="tab-ask" tabindex="0">
+        <div class="card hero">
+          <h2>Ask the filings</h2>
+          <p class="muted lead">Ask about the 2024 annual reports of Bank of America, Morgan Stanley and Wells Fargo, in English, French, Spanish, German, Italian or Portuguese. The assistant finds the most relevant pages, writes an answer in your language and cites each page. Every question is answered on its own.</p>
+          <form id="ask-form">
+            <label for="question" class="sr-only">Your question</label>
+            <textarea id="question" rows="3" maxlength="500" required
+                      placeholder="For example: What was Bank of America's CET1 ratio under the Advanced approach in 2024?"></textarea>
+            <div class="toolbar">
+              <div class="group">
+                <span class="group-label" id="ask-lang-label">Sample question language</span>
+                <div class="chips" id="ask-langs" role="group" aria-labelledby="ask-lang-label"></div>
+              </div>
+            </div>
+            <div class="toolbar">
+              <button type="submit" id="ask-button" class="primary">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/></svg>
+                Ask
+              </button>
+              <button type="button" id="ask-random" class="secondary">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22"/><path d="m18 2 4 4-4 4"/><path d="M2 6h1.9c1.5 0 2.9.9 3.6 2.2"/><path d="M22 18h-5.9c-1.3 0-2.6-.7-3.3-1.8l-.5-.8"/><path d="m18 14 4 4-4 4"/></svg>
+                Random question
+              </button>
+              <div class="switches">
+                <label class="switch" for="ask-rerank">
+                  <input type="checkbox" id="ask-rerank" role="switch" checked>
+                  <span class="track" aria-hidden="true"></span>
+                  <span class="switch-text"><strong>Rerank</strong> <span id="ask-rerank-hint" class="muted"></span></span>
+                </label>
+                <label class="switch" for="ask-focus">
+                  <input type="checkbox" id="ask-focus" role="switch" checked>
+                  <span class="track" aria-hidden="true"></span>
+                  <span class="switch-text"><strong>Context Focus</strong> <span id="ask-focus-hint" class="muted"></span></span>
+                </label>
+                <label class="switch" for="ask-images">
+                  <input type="checkbox" id="ask-images" role="switch" checked>
+                  <span class="track" aria-hidden="true"></span>
+                  <span class="switch-text"><strong>Page images</strong> <span id="ask-images-hint" class="muted"></span></span>
+                </label>
+              </div>
+            </div>
+          </form>
+          <p id="ask-sample-note" class="muted small-text" hidden></p>
+        </div>
+
+        <p id="ask-status" role="status" class="muted" hidden></p>
+        <div id="ask-skeleton" class="skeleton-block" hidden aria-hidden="true">
+          <span class="skeleton line wide"></span><span class="skeleton line"></span><span class="skeleton line short"></span>
+        </div>
+        <p id="ask-error" class="error banner-error" role="alert" hidden></p>
+
+        <div id="ask-result" hidden>
+          <div class="bubble user" id="ask-echo"></div>
+          <article class="bubble assistant">
+            <div id="answer" class="rich" aria-live="polite"></div>
+            <p id="sent-summary" class="sent"></p>
+            <p class="sent sent-note">This answer was written by an AI model. It can be wrong or incomplete, so check the figures against the cited pages.</p>
+          </article>
+
+          <section class="card insight" aria-labelledby="how-title">
+            <div class="insight-head">
+              <h3 id="how-title">How these pages were found</h3>
+              <span id="how-mode" class="pill"></span>
+            </div>
+            <ol id="how-steps" class="flow"></ol>
+            <p id="how-summary" class="muted"></p>
+            <p id="how-note" class="muted small-text how-note"><strong>Why the answer step takes longest:</strong> Claude reads each page's image as well as its text, about twice the input of text alone, so it can check figures in tables and charts and say where each fact came from. For faster answers, send the text only or fewer pages.</p>
+          </section>
+
+          <h3>Pages sent to the assistant</h3>
+          <p id="focus-legend" class="muted focus-legend" hidden><mark>Highlighted text</mark> is what Context Focus picked and Claude read; the rest of the page text was left out. <span id="focus-legend-images">Claude also saw each full page image.</span></p>
+          <p id="sources-note" class="muted"></p>
+          <div id="sources" class="grid"></div>
+        </div>
+      </section>
+
+      <!-- Search: retrieval only, no generated answer -->
+      <section id="panel-search" role="tabpanel" aria-labelledby="tab-search" tabindex="0" hidden>
+        <div class="card hero">
+          <h2>Search the filings</h2>
+          <p class="muted lead">Find the pages that answer a question, with no assistant. Type a question and press Enter, or load a random benchmark question in any of six languages, to see whether the known answer pages were found. The second button picks a question where Rerank helps and shows Embed and Embed + Rerank side by side.</p>
+          <form id="search-form">
+            <label for="search-question" class="sr-only">Search</label>
+            <textarea id="search-question" rows="2" maxlength="500" required
+                      placeholder="Type a question and press Enter, or load a random benchmark question below"></textarea>
+            <div class="toolbar">
+              <div class="group">
+                <span class="group-label" id="search-lang-label">Benchmark question language</span>
+                <div class="chips" id="search-langs" role="group" aria-labelledby="search-lang-label"></div>
+              </div>
+            </div>
+            <div class="toolbar">
+              <button type="button" id="golden-random" class="secondary">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22"/><path d="m18 2 4 4-4 4"/><path d="M2 6h1.9c1.5 0 2.9.9 3.6 2.2"/><path d="M22 18h-5.9c-1.3 0-2.6-.7-3.3-1.8l-.5-.8"/><path d="m18 14 4 4-4 4"/></svg>
+                Random question: Embed only
+              </button>
+              <button type="button" id="golden-rerank" class="secondary">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22"/><path d="m18 2 4 4-4 4"/><path d="M2 6h1.9c1.5 0 2.9.9 3.6 2.2"/><path d="M22 18h-5.9c-1.3 0-2.6-.7-3.3-1.8l-.5-.8"/><path d="m18 14 4 4-4 4"/></svg>
+                Random question: where Rerank helps
+              </button>
+            </div>
+            <p id="rerank-note" class="muted small-text" role="status" hidden><strong>Where Rerank tends to help:</strong> harder questions where the first search is weak, such as questions that combine facts from several places and long, detailed questions.</p>
+          </form>
+        </div>
+        <p id="search-status" role="status" class="muted" hidden></p>
+        <p id="search-error" class="error banner-error" role="alert" hidden></p>
+        <div id="search-result" hidden>
+          <div id="golden-banner" class="banner" hidden>
+            <p id="golden-headline" class="banner-title"></p>
+            <p id="golden-detail" class="muted"></p>
+            <details id="golden-reference" class="reference"><summary>Reference answer from the benchmark (English)</summary><div id="golden-reference-text" class="rich"></div></details>
+          </div>
+          <p id="not-golden" class="muted" hidden>This is not one of the benchmark questions, so there are no known answer pages to check against.</p>
+          <p id="search-path" class="muted"></p>
+          <div id="results-grid" class="results-grid">
+            <section class="results-col" aria-labelledby="col-embed-title">
+              <h3 id="col-embed-title">Embed</h3>
+              <p id="col-embed-meta" class="muted"></p>
+              <ol id="results" class="results"></ol>
+            </section>
+            <section id="col-rerank" class="results-col" aria-labelledby="col-rerank-title" hidden>
+              <h3 id="col-rerank-title">Embed + Rerank</h3>
+              <p id="col-rerank-meta" class="muted"></p>
+              <ol id="results-rerank" class="results"></ol>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <!-- Parse: where reading the page first pays off (precomputed, no model calls) -->
+      <section id="panel-parse" role="tabpanel" aria-labelledby="tab-parse" tabindex="0" hidden>
+        <div class="card hero">
+          <h2>What Parse adds</h2>
+          <p class="muted lead">Parse reads a page image and returns clean Markdown, with tables as real rows and columns. Everything on this tab was computed ahead of time from the demo documents, so nothing here calls a model.</p>
+        </div>
+
+        <section class="card">
+          <h3>1. Tables as data</h3>
+          <p class="muted">A financial statement comes out as rows and columns you can load into a spreadsheet or a database, not as a block of text. Pick a table, compare it with the page, and download it.</p>
+          <div class="toolbar nowrap">
+            <label for="parse-table-pick" class="sr-only">Table</label>
+            <select id="parse-table-pick"></select>
+          </div>
+          <p id="parse-table-error" class="error" role="alert" hidden></p>
+          <div id="parse-table-view" class="side-by-side" hidden>
+            <figure class="page-view">
+              <figcaption id="parse-page-caption" class="muted"></figcaption>
+              <p id="parse-page-status" class="muted">Loading the page...</p>
+              <a id="parse-page-link" target="_blank" rel="noopener" hidden><img id="parse-page-img" alt=""></a>
+            </figure>
+            <div class="table-view">
+              <p id="parse-table-caption" class="muted"></p>
+              <div class="table-scroll"><table id="parse-table" class="data"></table></div>
+              <div class="toolbar">
+                <button type="button" id="parse-copy" class="secondary small">Copy as CSV</button>
+                <button type="button" id="parse-download" class="secondary small">Download CSV</button>
+                <span id="parse-copy-status" class="muted" role="status"></span>
+              </div>
+            </div>
+          </div>
+          <ul id="parse-table-caveats" class="muted notes"></ul>
+        </section>
+
+        <section class="card">
+          <h3>2. Scanned and low-quality pages</h3>
+          <p class="muted">A scan has no text layer, so the page has to be read from the image. Each example below is a page made to look like a scan, with the same question answered twice by Claude: once from the page image alone, and once from the text Parse extracted from that image. Compare the two answers with the reference answer.</p>
+          <p id="scan-error" class="error" role="alert" hidden></p>
+          <div id="scan-example-controls" class="toolbar" hidden>
+            <label for="scan-filter">Show examples where</label>
+            <select id="scan-filter"></select>
+          </div>
+          <div id="scan-examples"></div>
+          <ul id="scan-caveats" class="muted notes"></ul>
+        </section>
+
+        <section class="card">
+          <h3>3. When you do not need it</h3>
+          <p class="muted">Clean, digital pages such as these annual reports already carry good text, and the assistant also reads the page image when it answers. That is why search and the assistant in this demo use the document's own text with Embed and Rerank, and Parse is kept for scans, for pages with weak text, and for getting tables out as data. Test it on your own documents before you decide.</p>        </section>
+      </section>
+    </div>
+  </main>
+
+  <script src="config.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,168 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  Financial Research Workbench on AWS. Cohere Embed, Rerank
+  and Parse on Amazon SageMaker with Anthropic Claude on Amazon Bedrock. Demo only, not
+  for production use.
+
+Parameters:
+  ProjectName:
+    Type: String
+    Default: frw
+    AllowedPattern: "^[a-z][a-z0-9-]{2,18}$"
+    Description: Prefix for all resource names.
+  ClaudeInferenceProfileId:
+    Type: String
+    Default: us.anthropic.claude-sonnet-4-5-20250929-v1:0
+    Description: Bedrock inference profile ID used for answer generation.
+  ExtraAossPrincipalArn:
+    Type: String
+    Default: ""
+    Description: Optional extra IAM role ARN with data access to the OpenSearch collection (development only).
+  CreateIndex:
+    Type: String
+    Default: "true"
+    AllowedValues: ["true", "false"]
+    Description: Development switch. Set to false to skip creating the page index.
+
+  DeployModels:
+    Type: String
+    Default: "true"
+    AllowedValues: ["true", "false"]
+    Description: Development switch. Set to false to delete the GPU endpoints and keep everything else.
+
+  ParseMode:
+    Type: String
+    Default: "off"
+    AllowedValues: ["off", cached, live]
+    Description: >-
+      off (default): use the page text shipped in the bundle for every page (Embed + Rerank only; two GPU endpoints).
+      The Parse tab of the web app is precomputed and works in every mode.
+      cached: pages the router selects (scans, low-text, table-heavy) use the Parse output shipped in the bundle; no Parse endpoint.
+      live: like cached, and pages missing from the cache are sent to a Parse endpoint (adds a GPU endpoint).
+  RouteLowText:
+    Type: String
+    Default: "true"
+    AllowedValues: ["true", "false"]
+    Description: Send pages with almost no text (scans, faxes, image-only pages) to Parse. Ignored when ParseMode is off.
+  RouteTables:
+    Type: String
+    Default: "true"
+    AllowedValues: ["true", "false"]
+    Description: Send table-heavy pages to Parse. Ignored when ParseMode is off.
+  IndexName:
+    Type: String
+    Default: pages
+    Description: >-
+      OpenSearch index used by ingestion and by the web app. The data stack creates "pages"; any other name must be
+      created first.
+  DeployRerank:
+    Type: String
+    Default: "true"
+    AllowedValues: ["true", "false"]
+    Description: Deploy the Rerank Fast endpoint. Set to false to use your own rerank endpoint (see RerankEndpointName).
+  RerankEndpointName:
+    Type: String
+    Default: ""
+    AllowedPattern: "^$|^[a-zA-Z0-9](-*[a-zA-Z0-9]){0,62}$"
+    Description: >-
+      Optional name of a rerank endpoint you provide (same account and region). Empty means the endpoint this stack
+      deploys. It must accept the Cohere rerank request format (query, documents, top_n).
+
+  AdminEmail:
+    Type: String
+    Default: ""
+    Description: Optional. Creates the first web app user and emails them a temporary password.
+  AppTitle:
+    Type: String
+    Default: Research and Diligence Workbench
+    MaxLength: 80
+  SiteVersion:
+    Type: String
+    Default: "1"
+    Description: Change to republish the web app files (scripts/deploy.sh sets it from the file contents).
+
+Conditions:
+  ShouldDeployModels: !Equals [!Ref DeployModels, "true"]
+  DeployParseEndpoint: !Equals [!Ref ParseMode, "live"]
+
+Resources:
+  FoundationStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: stacks/foundation.yaml
+      Parameters:
+        ProjectName: !Ref ProjectName
+        ClaudeInferenceProfileId: !Ref ClaudeInferenceProfileId
+        RerankEndpointName: !Ref RerankEndpointName
+
+  DataStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: stacks/data.yaml
+      Parameters:
+        ProjectName: !Ref ProjectName
+        DataKeyArn: !GetAtt FoundationStack.Outputs.DataKeyArn
+        DataSetupRoleArn: !GetAtt FoundationStack.Outputs.DataSetupRoleArn
+        IngestRoleArn: !GetAtt FoundationStack.Outputs.IngestRoleArn
+        QueryRoleArn: !GetAtt FoundationStack.Outputs.QueryRoleArn
+        ExtraAossPrincipalArn: !Ref ExtraAossPrincipalArn
+        CreateIndex: !Ref CreateIndex
+
+  ApiStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: stacks/api.yaml
+      Parameters:
+        ProjectName: !Ref ProjectName
+        QueryRoleArn: !GetAtt FoundationStack.Outputs.QueryRoleArn
+        DataBucketName: !GetAtt DataStack.Outputs.DataBucketName
+        CollectionEndpoint: !GetAtt DataStack.Outputs.CollectionEndpoint
+        ClaudeInferenceProfileId: !Ref ClaudeInferenceProfileId
+        IndexName: !Ref IndexName
+        RerankEndpointName: !Ref RerankEndpointName
+        AdminEmail: !Ref AdminEmail
+        AppTitle: !Ref AppTitle
+        SiteVersion: !Ref SiteVersion
+
+  ModelsStack:
+    Type: AWS::CloudFormation::Stack
+    Condition: ShouldDeployModels
+    Properties:
+      TemplateURL: stacks/models.yaml
+      Parameters:
+        ProjectName: !Ref ProjectName
+        DeployParse: !If [DeployParseEndpoint, "true", "false"]
+        DeployRerank: !Ref DeployRerank
+
+  PipelineStack:
+    Type: AWS::CloudFormation::Stack
+    Condition: ShouldDeployModels
+    Properties:
+      TemplateURL: stacks/pipeline.yaml
+      Parameters:
+        ProjectName: !Ref ProjectName
+        IngestRoleArn: !GetAtt FoundationStack.Outputs.IngestRoleArn
+        DataKeyArn: !GetAtt FoundationStack.Outputs.DataKeyArn
+        DataBucketName: !GetAtt DataStack.Outputs.DataBucketName
+        IngestStateTableName: !GetAtt DataStack.Outputs.IngestStateTableName
+        CollectionEndpoint: !GetAtt DataStack.Outputs.CollectionEndpoint
+        IndexName: !Ref IndexName
+        ParseMode: !Ref ParseMode
+        RouteLowText: !Ref RouteLowText
+        RouteTables: !Ref RouteTables
+    DependsOn: ModelsStack
+
+Outputs:
+  SiteUrl:
+    Value: !GetAtt ApiStack.Outputs.SiteUrl
+  UserPoolId:
+    Value: !GetAtt ApiStack.Outputs.UserPoolId
+  UserPoolClientId:
+    Value: !GetAtt ApiStack.Outputs.UserPoolClientId
+  IngestStateMachineArn:
+    Condition: ShouldDeployModels
+    Value: !GetAtt PipelineStack.Outputs.StateMachineArn
+  DataBucketName:
+    Value: !GetAtt DataStack.Outputs.DataBucketName
+  CollectionEndpoint:
+    Value: !GetAtt DataStack.Outputs.CollectionEndpoint

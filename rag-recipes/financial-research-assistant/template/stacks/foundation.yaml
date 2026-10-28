@@ -1,0 +1,193 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  Foundation for the Financial Research Workbench: customer-managed KMS key and the
+  IAM roles used by the Lambda functions. Resource names are derived from ProjectName so
+  other stacks can be scoped without circular dependencies.
+
+Parameters:
+  ProjectName:
+    Type: String
+    Description: Prefix for all resource names (lowercase letters, digits, hyphens).
+    AllowedPattern: "^[a-z][a-z0-9-]{2,18}$"
+  ClaudeInferenceProfileId:
+    Type: String
+    Description: Bedrock inference profile ID used for answer generation.
+  RerankEndpointName:
+    Type: String
+    Default: ""
+    AllowedPattern: "^$|^[a-zA-Z0-9](-*[a-zA-Z0-9]){0,62}$"
+    Description: Optional name of a rerank endpoint you provide. Empty means the endpoint this stack deploys (ProjectName-rerank).
+
+Conditions:
+  HasCustomRerank: !Not [!Equals [!Ref RerankEndpointName, ""]]
+
+Resources:
+  DataKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: !Sub "${ProjectName} data encryption key"
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AccountAdministration
+            Effect: Allow
+            Principal:
+              AWS: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:root"
+            Action: "kms:*"
+            Resource: "*"
+
+  DataKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub "alias/${ProjectName}-data"
+      TargetKeyId: !Ref DataKey
+
+  DataSetupRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ProjectName}-data-setup"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: data-setup
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ProjectName}-*"
+              - Effect: Allow
+                Action:
+                  - aoss:APIAccessAll
+                  - aoss:BatchGetCollection
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                  - s3:ListBucketVersions
+                  - s3:DeleteObject
+                  - s3:DeleteObjectVersion
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:s3:::${ProjectName}-data-${AWS::AccountId}-${AWS::Region}"
+                  - !Sub "arn:${AWS::Partition}:s3:::${ProjectName}-data-${AWS::AccountId}-${AWS::Region}/*"
+
+  IngestRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ProjectName}-ingest"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: ingest
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ProjectName}-*"
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:s3:::${ProjectName}-data-${AWS::AccountId}-${AWS::Region}"
+                  - !Sub "arn:${AWS::Partition}:s3:::${ProjectName}-data-${AWS::AccountId}-${AWS::Region}/*"
+              # Parse cache: results of a live Parse call are saved next to the page text in the bundle.
+              - Effect: Allow
+                Action: s3:PutObject
+                Resource: !Sub "arn:${AWS::Partition}:s3:::${ProjectName}-data-${AWS::AccountId}-${AWS::Region}/corpus/*/parsed/*"
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                  - kms:GenerateDataKey
+                Resource: !GetAtt DataKey.Arn
+              - Effect: Allow
+                Action: sagemaker:InvokeEndpoint
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:sagemaker:${AWS::Region}:${AWS::AccountId}:endpoint/${ProjectName}-parse"
+                  - !Sub "arn:${AWS::Partition}:sagemaker:${AWS::Region}:${AWS::AccountId}:endpoint/${ProjectName}-embed-pro"
+              - Effect: Allow
+                Action: aoss:APIAccessAll
+                Resource: !Sub "arn:${AWS::Partition}:aoss:${AWS::Region}:${AWS::AccountId}:collection/*"
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:UpdateItem
+                Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${ProjectName}-ingest-state"
+
+  QueryRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ProjectName}-query"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: query
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ProjectName}-*"
+              - Effect: Allow
+                Action: sagemaker:InvokeEndpoint
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:sagemaker:${AWS::Region}:${AWS::AccountId}:endpoint/${ProjectName}-embed-pro"
+                  - !If
+                    - HasCustomRerank
+                    - !Sub "arn:${AWS::Partition}:sagemaker:${AWS::Region}:${AWS::AccountId}:endpoint/${RerankEndpointName}"
+                    - !Sub "arn:${AWS::Partition}:sagemaker:${AWS::Region}:${AWS::AccountId}:endpoint/${ProjectName}-rerank"
+              - Effect: Allow
+                Action: aoss:APIAccessAll
+                Resource: !Sub "arn:${AWS::Partition}:aoss:${AWS::Region}:${AWS::AccountId}:collection/*"
+              - Effect: Allow
+                Action:
+                  - bedrock:InvokeModel
+                  - bedrock:InvokeModelWithResponseStream
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/${ClaudeInferenceProfileId}"
+                  - !Sub "arn:${AWS::Partition}:bedrock:*::foundation-model/anthropic.*"
+              - Effect: Allow
+                Action: s3:GetObject
+                Resource: !Sub "arn:${AWS::Partition}:s3:::${ProjectName}-data-${AWS::AccountId}-${AWS::Region}/corpus/*"
+              - Effect: Allow
+                Action: kms:Decrypt
+                Resource: !GetAtt DataKey.Arn
+
+Outputs:
+  DataKeyArn:
+    Value: !GetAtt DataKey.Arn
+  DataKeyId:
+    Value: !Ref DataKey
+  DataSetupRoleArn:
+    Value: !GetAtt DataSetupRole.Arn
+  IngestRoleArn:
+    Value: !GetAtt IngestRole.Arn
+  QueryRoleArn:
+    Value: !GetAtt QueryRole.Arn

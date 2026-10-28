@@ -17,6 +17,8 @@ Open a PR if you would like to contribute! :twisted_rightwards_arrows:
 
 **rag-receipes:** RAG, or Retrieval-Augmented Generation, is a technique where an LLM is augmented with the ability to retrieve and incorporate external information during the generation process. The rag-receipes folder contains different recipes or configurations for RAG, including various retrieval techniques, document stores, and methods for integrating external knowledge into the model's responses.
 
+**rag-recipes/financial-research-assistant:** A research assistant for financial filings, deployed with one CloudFormation template: Cohere Embed and Rerank (with Context Focus) on Amazon SageMaker AI find the right pages, Claude on Amazon Bedrock writes answers that cite each page, and saved Cohere Parse results show tables extracted as rows. See its [README](rag-recipes/financial-research-assistant/README.md).
+
 **workshop**: The [workshop](https://catalog.us-east-1.prod.workshops.aws/workshops/a7a3df78-086e-4159-8451-c1229e0f951e/en-US) folder is a central hub for collaborative projects between AWS and Cohere. It includes resources, documentation, and code for ongoing projects, as well as a knowledge base for best practices, guidelines, and tutorials for various AWS+Cohere architectures.
 
 ## Extra Resources 

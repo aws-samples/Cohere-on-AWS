@@ -1,0 +1,174 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  Ingestion pipeline for the Financial Research Workbench: a Step Functions Distributed Map reads
+  the page manifest from S3 and runs one Lambda per page (pick the page text, routing scans and
+  table-heavy pages to Parse when enabled; Embed Pro text and image; index into OpenSearch Serverless).
+
+Parameters:
+  ProjectName:
+    Type: String
+    AllowedPattern: "^[a-z][a-z0-9-]{2,18}$"
+  IngestRoleArn:
+    Type: String
+  DataKeyArn:
+    Type: String
+  DataBucketName:
+    Type: String
+  IngestStateTableName:
+    Type: String
+  CollectionEndpoint:
+    Type: String
+  EmbeddingDimension:
+    Type: Number
+    Default: 1024
+  IndexName:
+    Type: String
+    Default: pages
+    Description: OpenSearch index the pipeline writes to. It must already exist (the data stack creates "pages").
+  ParseMode:
+    Type: String
+    Default: "off"
+    AllowedValues: ["off", cached, live]
+  RouteLowText:
+    Type: String
+    Default: "true"
+    AllowedValues: ["true", "false"]
+  RouteTables:
+    Type: String
+    Default: "true"
+    AllowedValues: ["true", "false"]
+  MapConcurrency:
+    Type: Number
+    Default: 4
+    MinValue: 1
+    MaxValue: 32
+    Description: Pages processed in parallel. Parse and Embed Pro run on one GPU instance each.
+
+Resources:
+  IngestPageFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "${ProjectName}-ingest-page"
+      Runtime: python3.12
+      Handler: handler.handler
+      Role: !Ref IngestRoleArn
+      Timeout: 300
+      MemorySize: 512
+      Code: ../../src/lambdas/ingest_page
+      Environment:
+        Variables:
+          STATE_TABLE: !Ref IngestStateTableName
+          PARSE_MODE: !Ref ParseMode
+          PARSE_ENDPOINT: !Sub "${ProjectName}-parse"
+          ROUTE_LOW_TEXT: !Ref RouteLowText
+          ROUTE_TABLES: !Ref RouteTables
+          EMBED_ENDPOINT: !Sub "${ProjectName}-embed-pro"
+          COLLECTION_ENDPOINT: !Ref CollectionEndpoint
+          INDEX_NAME: !Ref IndexName
+          EMBEDDING_DIMENSION: !Ref EmbeddingDimension
+
+  IngestFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${ProjectName}-ingest-page"
+      RetentionInDays: 14
+
+  StateMachineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ProjectName}-ingest-sfn"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: states.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: ingest-workflow
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: lambda:InvokeFunction
+                Resource: !GetAtt IngestPageFunction.Arn
+              - Effect: Allow
+                Action: s3:ListBucket
+                Resource: !Sub "arn:${AWS::Partition}:s3:::${DataBucketName}"
+              - Effect: Allow
+                Action: s3:GetObject
+                Resource: !Sub "arn:${AWS::Partition}:s3:::${DataBucketName}/corpus/*"
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:AbortMultipartUpload
+                  - s3:ListMultipartUploadParts
+                Resource: !Sub "arn:${AWS::Partition}:s3:::${DataBucketName}/runs/*"
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                  - kms:GenerateDataKey
+                Resource: !Ref DataKeyArn
+              # Distributed Map starts child executions of this state machine.
+              - Effect: Allow
+                Action: states:StartExecution
+                Resource: !Sub "arn:${AWS::Partition}:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${ProjectName}-ingest"
+              - Effect: Allow
+                Action:
+                  - states:DescribeExecution
+                  - states:StopExecution
+                Resource: !Sub "arn:${AWS::Partition}:states:${AWS::Region}:${AWS::AccountId}:execution:${ProjectName}-ingest/*"
+
+  IngestStateMachine:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      StateMachineName: !Sub "${ProjectName}-ingest"
+      RoleArn: !GetAtt StateMachineRole.Arn
+      # A string definition keeps MaxConcurrency an integer (a Ref'd Number would render as a string).
+      # Input: {bucket, manifest_key}. One manifest line per page.
+      DefinitionString: !Sub |
+        {
+          "StartAt": "IngestPages",
+          "States": {
+            "IngestPages": {
+              "Type": "Map",
+              "MaxConcurrency": ${MapConcurrency},
+              "ItemReader": {
+                "Resource": "arn:aws:states:::s3:getObject",
+                "ReaderConfig": {"InputType": "JSONL"},
+                "Parameters": {"Bucket.$": "$.bucket", "Key.$": "$.manifest_key"}
+              },
+              "ItemSelector": {"bucket.$": "$.bucket", "page.$": "$$.Map.Item.Value"},
+              "ItemProcessor": {
+                "ProcessorConfig": {"Mode": "DISTRIBUTED", "ExecutionType": "STANDARD"},
+                "StartAt": "IngestPage",
+                "States": {
+                  "IngestPage": {
+                    "Type": "Task",
+                    "Resource": "arn:aws:states:::lambda:invoke",
+                    "Parameters": {"FunctionName": "${IngestPageFunction.Arn}", "Payload.$": "$"},
+                    "OutputPath": "$.Payload",
+                    "Retry": [{
+                      "ErrorEquals": ["States.TaskFailed", "Lambda.ServiceException", "Lambda.TooManyRequestsException"],
+                      "IntervalSeconds": 10, "BackoffRate": 2, "MaxAttempts": 3
+                    }],
+                    "Catch": [{"ErrorEquals": ["States.ALL"], "Next": "PageFailed"}],
+                    "End": true
+                  },
+                  "PageFailed": {"Type": "Pass", "Result": {"status": "failed"}, "End": true}
+                }
+              },
+              "ResultWriter": {
+                "Resource": "arn:aws:states:::s3:putObject",
+                "Parameters": {"Bucket": "${DataBucketName}", "Prefix": "runs"}
+              },
+              "End": true
+            }
+          }
+        }
+
+Outputs:
+  StateMachineArn:
+    Value: !Ref IngestStateMachine
+  IngestFunctionName:
+    Value: !Ref IngestPageFunction
